@@ -14,67 +14,26 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
-            <CommandBar x:Name="MenuBar" Grid.ColumnSpan="2">
+            <CommandBar x:Name="MenuBar" Grid.ColumnSpan="2" DefaultLabelPosition="Right">
                 <CommandBar.Content>
                     <Grid/>
                 </CommandBar.Content>
                 <AppBarButton x:Name="settings" Icon="Setting" Label="Settings"  Click="OnElementClicked"/>
+                <AppBarButton x:Name="about" Icon="Help" Label="About"  Click="OnElementClicked"/>
             </CommandBar>
 
-            <ListView x:Name="ChatListView" ItemsSource="{x:Bind ChatRows}" Margin="0,40,0,52" SelectionMode="Single" >
+            <ListView x:Name="ChatListView" Margin="0,40,0,52" SelectionMode="None" Loaded="Page_Loaded">
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <ItemsStackPanel ItemsUpdatingScrollMode="KeepLastItemInView"
                               VerticalAlignment="Bottom"/>
                     </ItemsPanelTemplate>
                 </ListView.ItemsPanel>
-
-                <!-- This setter property is created so ListViewItems correctly align to the left or right. -->
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
                     </Style>
                 </ListView.ItemContainerStyle>
-                <ListView.ItemTemplate>
-                    <DataTemplate x:Name="ChatLitView" x:DataType="Models:ChatRow">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"/>
-                                <RowDefinition Height="*"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Ellipse x:Name="Ellipse"
-                            Grid.RowSpan="2"
-                            Width ="32"
-                            Height="32"
-                            Margin="6"
-                            VerticalAlignment="Center"
-                            HorizontalAlignment="Center">
-                                <Ellipse.Fill>
-                                    <ImageBrush ImageSource="{x:Bind ImageSource}" Stretch="Fill"></ImageBrush>
-                                </Ellipse.Fill>
-                            </Ellipse>
-
-                            <TextBlock Grid.Column="1"
-                                x:Phase="1"
-                                Text="{x:Bind NickName}"
-                                Style="{ThemeResource BaseTextBlockStyle}"
-                                FontSize="18"
-                                Foreground="{ThemeResource SystemAccentColor}"
-                                Margin="12,6,0,0"/>
-                            <TextBlock  Grid.Column="1"
-                            Grid.Row="1"
-                            Text="{x:Bind ChatText}"
-                            x:Phase="2"
-                            Style="{ThemeResource BodyTextBlockStyle}"
-                            FontSize="18"
-                            Margin="18,0,0,6"/>
-                        </Grid>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
             </ListView>
         </Grid>
         <Grid Grid.Row="1">

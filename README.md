@@ -1,1 +1,0 @@
-# Streamer Universal Chat Application

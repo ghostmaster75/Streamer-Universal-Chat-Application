@@ -1,0 +1,39 @@
+﻿<Page
+    x:Class="Streamer_Universal_Chat_Application.About"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Streamer_Universal_Chat_Application"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- App Bar -->
+        <CommandBar Grid.Row="0" DefaultLabelPosition="Right">
+            <AppBarButton Icon="Back" Label="Back" Click="Back_Click"/>
+        </CommandBar>
+
+        <!-- Content -->
+        <StackPanel Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Center">
+            <TextBlock Text="Streamer Universal Chat Application" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
+            <TextBlock Text="Author: Piuerluigi 'Ghost' Natale" FontSize="16" Margin="0,0,0,10"/>
+            <TextBlock Text="Libraries used:" FontSize="16" Margin="0,0,0,10"/>
+            <HyperlinkButton Content="TwitchLib_Sharp"
+                             NavigateUri="https://github.com/TwitchLib/TwitchLib"
+                             FontSize="16"
+                             Margin="0,0,0,5"/>
+            <HyperlinkButton Content="TikTokLiveSharp"
+                             NavigateUri="https://github.com/frankvHoof93/TikTokLiveSharp"
+                             FontSize="16"
+                             Margin="0,0,0,20"/>
+            <TextBlock Text="Disclaimer:" FontSize="16" Margin="0,0,0,10"/>
+            <TextBlock TextWrapping="Wrap" Text="This application is not affiliated with, endorsed or specifically approved by Twitch or TikTok. It is not maintained, authorized or sponsored by Twitch, TikTok, or any of their affiliates, subsidiaries, or employees, and the trademarks are registered to their respective owners." FontSize="16"/>
+        </StackPanel>
+    </Grid>
+</Page>

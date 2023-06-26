@@ -1,41 +1,45 @@
-﻿using System;
+﻿using Streamer_Universal_Chat_Application.Models;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TwitchLib.Client.Models;
+using System.Diagnostics;
+using System.ServiceModel.Dispatcher;
 using TwitchLib.Client;
-using TwitchLib.Communication.Models;
-using TwitchLib.Communication.Clients;
-using TwitchLib.Client.Events;
-using TwitchLib.Client.Extensions;
-using System.Collections.ObjectModel;
 using TwitchLib.Client.Enums;
-using Windows.UI.Xaml.Controls;
-using Windows.System;
-using System.Runtime.CompilerServices;
+using TwitchLib.Client.Events;
+using TwitchLib.Client.Models;
+using TwitchLib.Communication.Clients;
+using TwitchLib.Communication.Models;
+using TwitchLib.Api.Helix;
+using Windows.UI;
+using static Streamer_Universal_Chat_Application.Common.Events;
+using System.Threading.Tasks;
+using TwitchLib.Api.Helix.Models.Chat.Badges.GetChannelChatBadges;
 
 namespace Streamer_Universal_Chat_Application.Common
 {
     class Twitch
     {
         private TwitchClient client;
+
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
         public event EventHandler<LogEventArgs> Log;
         public event EventHandler<ConnectedEventArgs> Connected;
+        public event EventHandler<StatusMessageEventArgs> StatusMessageReceived;
 
 
-        public Twitch()
+        public Twitch(String twitchUser, String twitchToken, String twitchChannel)
         {
-            ConnectionCredentials credentials = new ConnectionCredentials("ghostshadow75", "gpe7kx4lmb34wj97w0xv0kfw22pt7k");
+            ConnectionCredentials credentials = new ConnectionCredentials(twitchUser, twitchToken);
             var clientOptions = new ClientOptions
             {
                 MessagesAllowedInPeriod = 750,
-                ThrottlingPeriod = TimeSpan.FromSeconds(30)
+                ThrottlingPeriod = TimeSpan.FromSeconds(30) 
             };
             WebSocketClient customClient = new WebSocketClient(clientOptions);
             client = new TwitchClient(customClient);
-            client.Initialize(credentials, "ghostshadow75");
+            client.WillReplaceEmotes = true;
+
+            client.Initialize(credentials, twitchChannel);
 
             client.OnLog += Client_OnLog;
             client.OnJoinedChannel += Client_OnJoinedChannel;
@@ -50,17 +54,19 @@ namespace Streamer_Universal_Chat_Application.Common
         private void Client_OnLog(object sender, OnLogArgs e)
         {
             OnLog(new LogEventArgs(e.Data));
-            Console.WriteLine($"{e.DateTime.ToString()}: {e.BotUsername} - {e.Data}");
+            Debug.WriteLine($"{e.DateTime.ToString()}: {e.BotUsername} - {e.Data}");
         }
 
-        protected virtual void OnLog(LogEventArgs e) {
+        protected virtual void OnLog(LogEventArgs e)
+        {
             Log?.Invoke(this, e);
         }
 
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
             OnConnected(new ConnectedEventArgs(true));
-            Console.WriteLine($"Connected to {e.AutoJoinChannel}");
+            this.StatusMessage("Twitch joined");
+            Debug.WriteLine($"Connected to {e.AutoJoinChannel}");
         }
 
         protected virtual void OnConnected(ConnectedEventArgs e)
@@ -75,9 +81,40 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
         {
-            OnMessageReceived(new MessageReceivedEventArgs(e.ChatMessage));
-            if (e.ChatMessage.Message.Contains("badword"))
-                client.TimeoutUser(e.ChatMessage.Channel, e.ChatMessage.Username, TimeSpan.FromMinutes(30), "Bad word! 30 minute timeout!");
+            Color color = new Color();
+            var uiSettings = new Windows.UI.ViewManagement.UISettings();
+            if (e.ChatMessage.Color != null)
+            {
+                // questo è un bug della libreria di twich che mette il valore di A alla fine della stringa invece che all'inizio
+                byte R = Convert.ToByte(e.ChatMessage.Color.Name.Substring(0, 2), 16);
+                byte G = Convert.ToByte(e.ChatMessage.Color.Name.Substring(2, 2), 16);
+                byte B = Convert.ToByte(e.ChatMessage.Color.Name.Substring(4, 2), 16);
+                color = Color.FromArgb(255, R, G, B);
+            }
+            else
+            {
+                color = uiSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Accent);
+            }
+            String message = e.ChatMessage.Message;
+
+            e.ChatMessage.EmoteSet.Emotes.ForEach(emote =>
+            {
+                message = message.Replace(emote.Name, emote.ImageUrl);
+            });            
+
+            if (e.ChatMessage.EmoteReplacedMessage != null)
+            {
+                message = e.ChatMessage.EmoteReplacedMessage;
+            }
+
+
+
+            ChatRow chatRow = new ChatRow(Common.Sources.Twitch, Common.Costant.TwitchLogo, e.ChatMessage.DisplayName, e.ChatMessage.Badges, message, e.ChatMessage.TmiSentTs, color);
+
+            OnMessageReceived(new MessageReceivedEventArgs(chatRow));
+
+            //if (e.ChatMessage.Message.Contains("badword"))
+            //    client.TimeoutUser(e.ChatMessage.Channel, e.ChatMessage.Username, TimeSpan.FromMinutes(30), "Bad word! 30 minute timeout!");
         }
 
         protected virtual void OnMessageReceived(MessageReceivedEventArgs e)
@@ -99,35 +136,17 @@ namespace Streamer_Universal_Chat_Application.Common
             else
                 client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points!");
         }
-    }
 
-    class MessageReceivedEventArgs : EventArgs
-    {
-        public ChatMessage ChatMessage { get; }
-
-        public MessageReceivedEventArgs(ChatMessage chatMessage)
+        private void StatusMessage(String message)
         {
-            ChatMessage = chatMessage;
+
+            OnStatusMessage(new StatusMessageEventArgs(message));
         }
-    }
 
-    class LogEventArgs : EventArgs
-    {
-        public String Data { get; }
-
-        public LogEventArgs(String data)
+        protected virtual void OnStatusMessage(StatusMessageEventArgs e)
         {
-            Data = data;
-        }
-    }
-
-    class ConnectedEventArgs : EventArgs
-    {
-        public Boolean IsConnected { get; }
-
-        public ConnectedEventArgs(Boolean isConnected)
-        {
-            IsConnected = isConnected;
+            // Verifica se ci sono handler registrati per l'evento
+            StatusMessageReceived?.Invoke(this, e);
         }
     }
 
