@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-using Streamer_Universal_Chat_Application.Common;
+﻿using Streamer_Universal_Chat_Application.Common;
 using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -125,7 +124,7 @@ namespace Streamer_Universal_Chat_Application
             settings.SaveSetting("TwitchToken", passwordBoxTwitchToken.Password);
             settings.SaveSetting("TwitchChannel", textBoxTwitchChannel.Text);
             settings.SaveSetting("TiktokEnable", TiktokEnable.IsOn.ToString());
-            settings.SaveSetting("TikTokUserName", textBoxTikTokUserName.Text);
+            settings.SaveSetting("TikTokUserName", textBoxTikTokUserName.Text.Replace("@",""));
             this.LoadSettings();
             this.DisableButtons();
         }

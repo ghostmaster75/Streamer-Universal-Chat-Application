@@ -2,9 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using TikTokLiveSharp.Client;
 using TikTokLiveSharp.Events.MessageData.Messages;
 using Windows.UI;
@@ -17,12 +14,10 @@ namespace Streamer_Universal_Chat_Application.Common
         public event EventHandler<StatusMessageEventArgs> StatusMessageReceived;
         public event EventHandler<ConnectedEventArgs> Connected;
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
-        private String TikTokUser;
         private readonly TikTokLiveClient client;
 
         public TikTok(String tikTokUser)
         {
-            TikTokUser = tikTokUser;
             client = new TikTokLiveClient(tikTokUser);
             client.OnConnected += Client_OnConnected;
             client.OnDisconnected += Client_OnDisconnected;
@@ -36,23 +31,33 @@ namespace Streamer_Universal_Chat_Application.Common
             client.OnLike += Client_OnLike;
             client.OnGiftMessage += Client_OnGiftMessage;
             client.OnEmote += Client_OnEmote;
-            try
-            {
-                client.Start(new System.Threading.CancellationToken());
+            client.OnException += Client_Error;
+            //try
+            //{
+                client.Start(new System.Threading.CancellationToken(), Client_Error, true);
                 //client.Run(new System.Threading.CancellationToken());
-            }
-            catch (Exception e)
-            {
-                this.StatusMessage(e.Message);
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.StackTrace);
-            }
+            //}
+            //catch (Exception e)
+            //{
+            //    this.StatusMessage(e.Message);
+            //    Debug.WriteLine(e.Message);
+            //    Debug.WriteLine(e.StackTrace);
+            //}
         }
 
+        private void Client_Error(object sender, Exception e)
+        {
+            this.StatusMessage(e.Message);
+        }
+
+        private void Client_Error(Exception e)
+        {
+            this.StatusMessage(e.Message);
+        }
 
         private void Client_OnConnected(TikTokLiveClient sender, bool e)
         {
-            OnConnected(new ConnectedEventArgs(true));
+            OnConnected(new ConnectedEventArgs(e));
             this.StatusMessage("TikTok is connected to room");
             Debug.WriteLine($"Connected to Room! [Connected:{e}]");
         }
@@ -65,7 +70,7 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private void Client_OnDisconnected(TikTokLiveClient sender, bool e)
         {
-            OnConnected(new ConnectedEventArgs(true));
+            OnConnected(new ConnectedEventArgs(e));
             this.StatusMessage("TikTok is disconnected");
             Debug.WriteLine($"Disconnected from Room! [Connected:{e}]");
         }
@@ -91,7 +96,7 @@ namespace Streamer_Universal_Chat_Application.Common
         {
             Debug.WriteLine($"{e.User.UniqueId}: {e.Text}");
 
-            Color color = new Color();
+            Color color = new Color();            
             var uiSettings = new Windows.UI.ViewManagement.UISettings();
             color = uiSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Accent);
             DateTime pointOfReference = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -102,14 +107,13 @@ namespace Streamer_Universal_Chat_Application.Common
 
             List<KeyValuePair<string, string>> badges = new List<KeyValuePair<string, string>>();
 
-            ChatRow chatRow = new ChatRow(Common.Sources.Tiktok, Common.Costant.TikTokLogo, e.User.NickName,badges, e.Text, times.ToString("dd-MM-yyy HH:mm:ss"), color);
+            ChatRow chatRow = new ChatRow(Sources.Tiktok, Costant.TikTokLogo, e.User.NickName,badges, e.Text, times.ToString("dd-MM-yyy HH:mm:ss"), color);
 
             OnMessageReceived(new MessageReceivedEventArgs(chatRow));
         }
 
         protected virtual void OnMessageReceived(MessageReceivedEventArgs e)
         {
-            // Verifica se ci sono handler registrati per l'evento
             MessageReceived?.Invoke(this, e);
         }
 
@@ -149,7 +153,6 @@ namespace Streamer_Universal_Chat_Application.Common
 
         protected virtual void OnStatusMessage(StatusMessageEventArgs e)
         {
-            // Verifica se ci sono handler registrati per l'evento
             StatusMessageReceived?.Invoke(this, e);
         }
 
@@ -158,11 +161,6 @@ namespace Streamer_Universal_Chat_Application.Common
             DateTime pointOfReference = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             long ticks = (long)(nanoseconds / ticksPerNanosecond);
             return pointOfReference.AddTicks(ticks);
-        }
-
-        private static DateTime GetDTCTime(ulong nanoseconds)
-        {
-            return GetDTCTime(nanoseconds, 100);
         }
 
     }

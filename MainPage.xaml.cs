@@ -2,17 +2,11 @@
 using Streamer_Universal_Chat_Application.Models;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text.RegularExpressions;
-using TwitchLib.Api.Core.Interfaces;
-using TwitchLib.Api.Helix;
 using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Documents;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Media.Imaging;
 using static Streamer_Universal_Chat_Application.Common.Events;
 using Color = Windows.UI.Color;
 
@@ -23,9 +17,8 @@ namespace Streamer_Universal_Chat_Application
     public sealed partial class MainPage : Page
     {
         private AppSettings appSettings = new AppSettings();
-        private TextBlock textBlockStatusMessage;
-        ListView chatListView;
-        private BuildRow buildRow = new BuildRow();
+        private ListView chatListView;
+        private BuildRow BuildRow = new BuildRow();
 
 
         public MainPage()
@@ -36,27 +29,26 @@ namespace Streamer_Universal_Chat_Application
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            textBlockStatusMessage = (TextBlock)FindName("TextBlockStatusMessage");
             if ((appSettings.LoadSetting("TwitchUsername") != null && appSettings.LoadSetting("TwitchToken") != null && appSettings.LoadSetting("TwitchChannel") != null) && appSettings.LoadSetting("TwitchEnable") == "True")
             {
                 Twitch twitch = new Twitch(appSettings.LoadSetting("TwitchUsername"), appSettings.LoadSetting("TwitchToken"), appSettings.LoadSetting("TwitchChannel"));
-                twitch.MessageReceived += newChat;
-                twitch.Connected += onLogon;
-                twitch.StatusMessageReceived += onStatus;
+                twitch.MessageReceived += NewChat;
+                twitch.Connected += OnLogon;
+                twitch.StatusMessageReceived += OnStatus;
             }
 
             if (appSettings.LoadSetting("TikTokUserName") != null && appSettings.LoadSetting("TiktokEnable") == "True")
             {
                 TikTok tikTok = new TikTok(appSettings.LoadSetting("TikTokUserName"));
-                tikTok.Connected += onLogon;
-                tikTok.MessageReceived += newChat;
-                tikTok.StatusMessageReceived += onStatus;
+                tikTok.Connected += OnLogon;
+                tikTok.MessageReceived += NewChat;
+                tikTok.StatusMessageReceived += OnStatus;
             }
             this.AppChat("Welcome");
 
         }
 
-        private async void onStatus(object sender, StatusMessageEventArgs e)
+        private async void OnStatus(object sender, StatusMessageEventArgs e)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
@@ -69,7 +61,7 @@ namespace Streamer_Universal_Chat_Application
 
 
 
-        private async void onLogon(object sender, ConnectedEventArgs e)
+        private async void OnLogon(object sender, ConnectedEventArgs e)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
@@ -95,13 +87,13 @@ namespace Streamer_Universal_Chat_Application
             });
         }
 
-        private async void newChat(object sender, MessageReceivedEventArgs e)
+        private async void NewChat(object sender, MessageReceivedEventArgs e)
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 if (e.ChatRow.ChatText != null)
                 {
-                    Grid grid = buildRow.Make(e.ChatRow);
+                    Grid grid = BuildRow.Make(e.ChatRow);
                     chatListView.Items.Add(grid);
                 }
             });
@@ -126,7 +118,7 @@ namespace Streamer_Universal_Chat_Application
             Color color = uiSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Accent);
             List<KeyValuePair<string, string>> badges = new List<KeyValuePair<string, string>>();
             ChatRow appRow = new ChatRow(Common.Sources.Application, Common.Costant.RoundedLogo, "Streamer Universal Chat Application", badges, Message, "0", color);
-            Grid grid = buildRow.Make(appRow);
+            Grid grid = BuildRow.Make(appRow);
             chatListView.Items.Add(grid);
         }
 
