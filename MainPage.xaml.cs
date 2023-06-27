@@ -47,22 +47,13 @@ namespace Streamer_Universal_Chat_Application
 
             if (appSettings.LoadSetting("TikTokUserName") != null && appSettings.LoadSetting("TiktokEnable") == "True")
             {
-                this.ConnectTiktok();
+                TikTok tikTok = new TikTok(appSettings.LoadSetting("TikTokUserName"));
+                tikTok.Connected += onLogon;
+                tikTok.MessageReceived += newChat;
+                tikTok.StatusMessageReceived += onStatus;
             }
             this.AppChat("Welcome");
 
-        }
-
-        private async void ConnectTiktok() {
-            TikTok tikTok = new TikTok(appSettings.LoadSetting("TikTokUserName"));
-            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
-            {
-                
-                await tikTok.RunAsync(appSettings.LoadSetting("TikTokUserName"));
-                
-            });
-            tikTok.Connected += onLogon;
-            tikTok.StatusMessageReceived += onStatus;
         }
 
         private async void onStatus(object sender, StatusMessageEventArgs e)
@@ -82,10 +73,13 @@ namespace Streamer_Universal_Chat_Application
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                if (sender is Twitch) { 
+                if (sender is Twitch) {
                     if (e.IsConnected)
                     {
                         TwitchLed.Fill = new SolidColorBrush(Colors.Green);
+                    }
+                    else {
+                        TwitchLed.Fill = new SolidColorBrush(Colors.Red);
                     }
                 }
                 if (sender is TikTok)
@@ -93,6 +87,8 @@ namespace Streamer_Universal_Chat_Application
                     if (e.IsConnected)
                     {
                         TikTokLed.Fill = new SolidColorBrush(Colors.Green);
+                    } else { 
+                        TikTokLed.Fill = new SolidColorBrush(Colors.Red); 
                     }
                 }
 

@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using TikTokLiveSharp.Client;
 using TikTokLiveSharp.Events.MessageData.Messages;
@@ -16,14 +18,12 @@ namespace Streamer_Universal_Chat_Application.Common
         public event EventHandler<ConnectedEventArgs> Connected;
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
         private String TikTokUser;
+        private readonly TikTokLiveClient client;
 
         public TikTok(String tikTokUser)
         {
             TikTokUser = tikTokUser;
-        }
-
-        public async Task RunAsync(String tikTokUser) {
-            var client = new TikTokLiveClient(tikTokUser);
+            client = new TikTokLiveClient(tikTokUser);
             client.OnConnected += Client_OnConnected;
             client.OnDisconnected += Client_OnDisconnected;
             client.OnViewerData += Client_OnViewerData;
@@ -36,21 +36,19 @@ namespace Streamer_Universal_Chat_Application.Common
             client.OnLike += Client_OnLike;
             client.OnGiftMessage += Client_OnGiftMessage;
             client.OnEmote += Client_OnEmote;
-
-            await Task.Run(() =>
+            try
             {
-                try
-                {
-                    client.Run(new System.Threading.CancellationToken());
-                }
-                catch (Exception e)
-                {
-                    this.StatusMessage(e.Message);
-                    Debug.WriteLine(e.Message);
-                    Debug.WriteLine(e.StackTrace);
-                }
-            });
+                client.Start(new System.Threading.CancellationToken());
+                //client.Run(new System.Threading.CancellationToken());
+            }
+            catch (Exception e)
+            {
+                this.StatusMessage(e.Message);
+                Debug.WriteLine(e.Message);
+                Debug.WriteLine(e.StackTrace);
+            }
         }
+
 
         private void Client_OnConnected(TikTokLiveClient sender, bool e)
         {
@@ -67,6 +65,7 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private void Client_OnDisconnected(TikTokLiveClient sender, bool e)
         {
+            OnConnected(new ConnectedEventArgs(true));
             this.StatusMessage("TikTok is disconnected");
             Debug.WriteLine($"Disconnected from Room! [Connected:{e}]");
         }
@@ -80,6 +79,7 @@ namespace Streamer_Universal_Chat_Application.Common
         {
             this.StatusMessage("TikTok host ended stream");
             Debug.WriteLine("Host ended Stream!");
+            client.Stop();  
         }
 
         private static void Client_OnJoin(TikTokLiveClient sender, Join e)
@@ -102,7 +102,7 @@ namespace Streamer_Universal_Chat_Application.Common
 
             List<KeyValuePair<string, string>> badges = new List<KeyValuePair<string, string>>();
 
-            ChatRow chatRow = new ChatRow(Common.Sources.Tiktok, Common.Costant.TwitchLogo, e.User.NickName,badges, e.Text, times.ToString("dd-MM-yyy HH:mm:ss"), color);
+            ChatRow chatRow = new ChatRow(Common.Sources.Tiktok, Common.Costant.TikTokLogo, e.User.NickName,badges, e.Text, times.ToString("dd-MM-yyy HH:mm:ss"), color);
 
             OnMessageReceived(new MessageReceivedEventArgs(chatRow));
         }
@@ -113,7 +113,7 @@ namespace Streamer_Universal_Chat_Application.Common
             MessageReceived?.Invoke(this, e);
         }
 
-        private static void Client_OnFollow(TikTokLiveClient sender, Follow e)
+        private static void Client_OnFollow(object sender, Follow e)
         {
             Debug.WriteLine($"{e.NewFollower?.UniqueId} followed!");
         }
@@ -142,7 +142,6 @@ namespace Streamer_Universal_Chat_Application.Common
         {
             Debug.WriteLine($"{e.User.UniqueId} sent {e.EmoteId}!");
         }
-
         private void StatusMessage(String message)
         {
             OnStatusMessage(new StatusMessageEventArgs(message));
