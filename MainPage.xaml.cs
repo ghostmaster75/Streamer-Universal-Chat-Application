@@ -45,14 +45,24 @@ namespace Streamer_Universal_Chat_Application
                 twitch.StatusMessageReceived += onStatus;
             }
 
-            if (appSettings.LoadSetting("TikTokUserNane") != null && appSettings.LoadSetting("TiktokEnable") == "True")
+            if (appSettings.LoadSetting("TikTokUserName") != null && appSettings.LoadSetting("TiktokEnable") == "True")
             {
-                TikTok tikTok = new TikTok(appSettings.LoadSetting("TikTokUser"));
-                tikTok.Connected += onLogon;
-                tikTok.StatusMessageReceived += onStatus;
+                this.ConnectTiktok();
             }
             this.AppChat("Welcome");
 
+        }
+
+        private async void ConnectTiktok() {
+            TikTok tikTok = new TikTok(appSettings.LoadSetting("TikTokUserName"));
+            await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+            {
+                
+                await tikTok.RunAsync(appSettings.LoadSetting("TikTokUserName"));
+                
+            });
+            tikTok.Connected += onLogon;
+            tikTok.StatusMessageReceived += onStatus;
         }
 
         private async void onStatus(object sender, StatusMessageEventArgs e)

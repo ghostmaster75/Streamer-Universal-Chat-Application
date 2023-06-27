@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using TikTokLiveSharp.Client;
 using TikTokLiveSharp.Events.MessageData.Messages;
 using Windows.UI;
@@ -14,9 +15,14 @@ namespace Streamer_Universal_Chat_Application.Common
         public event EventHandler<StatusMessageEventArgs> StatusMessageReceived;
         public event EventHandler<ConnectedEventArgs> Connected;
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+        private String TikTokUser;
 
         public TikTok(String tikTokUser)
         {
+            TikTokUser = tikTokUser;
+        }
+
+        public async Task RunAsync(String tikTokUser) {
             var client = new TikTokLiveClient(tikTokUser);
             client.OnConnected += Client_OnConnected;
             client.OnDisconnected += Client_OnDisconnected;
@@ -30,16 +36,20 @@ namespace Streamer_Universal_Chat_Application.Common
             client.OnLike += Client_OnLike;
             client.OnGiftMessage += Client_OnGiftMessage;
             client.OnEmote += Client_OnEmote;
-            try
+
+            await Task.Run(() =>
             {
-                client.Run(new System.Threading.CancellationToken());
-            }
-            catch (Exception e)
-            {
-                this.StatusMessage(e.Message);
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.StackTrace);
-            }
+                try
+                {
+                    client.Run(new System.Threading.CancellationToken());
+                }
+                catch (Exception e)
+                {
+                    this.StatusMessage(e.Message);
+                    Debug.WriteLine(e.Message);
+                    Debug.WriteLine(e.StackTrace);
+                }
+            });
         }
 
         private void Client_OnConnected(TikTokLiveClient sender, bool e)
