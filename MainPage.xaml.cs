@@ -48,6 +48,7 @@ namespace Streamer_Universal_Chat_Application
             if (appSettings.LoadSetting("TikTokUserNane") != null && appSettings.LoadSetting("TiktokEnable") == "True")
             {
                 TikTok tikTok = new TikTok(appSettings.LoadSetting("TikTokUser"));
+                tikTok.Connected += onLogon;
                 tikTok.StatusMessageReceived += onStatus;
             }
             this.AppChat("Welcome");
@@ -71,10 +72,20 @@ namespace Streamer_Universal_Chat_Application
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                if (e.IsConnected)
-                {
-                    TwitchLed.Fill = new SolidColorBrush(Colors.Green);
+                if (sender is Twitch) { 
+                    if (e.IsConnected)
+                    {
+                        TwitchLed.Fill = new SolidColorBrush(Colors.Green);
+                    }
                 }
+                if (sender is TikTok)
+                {
+                    if (e.IsConnected)
+                    {
+                        TikTokLed.Fill = new SolidColorBrush(Colors.Green);
+                    }
+                }
+
             });
         }
 

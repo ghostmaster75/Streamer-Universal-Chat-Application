@@ -32,7 +32,7 @@
             <StackPanel Grid.Column="1">
                 <ToggleSwitch x:Name="TwitchEnable"  Margin="15,15,15,0" Toggled="Enable_Click"/>
                 <TextBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" Header="Twitch Username:" PlaceholderText="Username"  x:Name="TwitchUserNane" Margin="15,15,15,0" TextChanged="Settings_Changed" />
-                <PasswordBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" Header="Twitch Access Token: (go to https://twitchtokengenerator.com/ and generate new Bot Chat Token) " PlaceholderText="Access Token" x:Name="TwitchAccessToken"  Margin="15,15,15,0"/>
+                <PasswordBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" Header="Twitch Access Token: (go to https://twitchtokengenerator.com and generate new Bot Chat Token) " PlaceholderText="Access Token" x:Name="TwitchAccessToken"  Margin="15,15,15,0"/>
                 <TextBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" Header="Twitch Channel:" PlaceholderText="Channel" x:Name="TwitchChannel"  Margin="15,15,15,15" />
             </StackPanel>
         </Grid>

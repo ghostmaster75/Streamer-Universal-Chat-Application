@@ -9,7 +9,7 @@
   <Identity
     Name="29965PierlugiNatale.StreamerUiversalChatApplicatio"
     Publisher="CN=FCB80278-744C-44D0-96F8-4B6B4375A7D6"
-    Version="1.0.0.0" />
+    Version="1.0.2.0" />
 
   <mp:PhoneIdentity PhoneProductId="83aa8de4-9b34-4b40-9e46-1fa38eb463ff" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
