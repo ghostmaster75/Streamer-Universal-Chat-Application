@@ -19,7 +19,8 @@ namespace Streamer_Universal_Chat_Application
         private AppSettings appSettings = new AppSettings();
         private ListView chatListView;
         private BuildRow BuildRow = new BuildRow();
-        private Twitch twitch;
+        private Twitch _twitch = Twitch.Instance;
+        private TikTok _tiktok = TikTok.Instance;
 
         public MainPage()
         {
@@ -31,18 +32,18 @@ namespace Streamer_Universal_Chat_Application
         {
             if ((appSettings.LoadSetting("TwitchUsername") != null && appSettings.LoadSetting("TwitchToken") != null && appSettings.LoadSetting("TwitchChannel") != null) && appSettings.LoadSetting("TwitchEnable") == "True")
             {
-                twitch = new Twitch(appSettings.LoadSetting("TwitchUsername"), appSettings.LoadSetting("TwitchToken"), appSettings.LoadSetting("TwitchChannel"));
-                twitch.MessageReceived += NewChat;
-                twitch.Connected += OnLogon;
-                twitch.StatusMessageReceived += OnStatus;
+                _twitch.ConnectToStreamAsync(appSettings.LoadSetting("TwitchUsername"), appSettings.LoadSetting("TwitchToken"), appSettings.LoadSetting("TwitchChannel"));
+                _twitch.MessageReceived += NewChat;
+                _twitch.Connected += OnLogon;
+                _twitch.StatusMessageReceived += OnStatus;
             }
 
             if (appSettings.LoadSetting("TikTokUserName") != null && appSettings.LoadSetting("TiktokEnable") == "True")
             {
-                TikTok tikTok = new TikTok(appSettings.LoadSetting("TikTokUserName"));
-                tikTok.Connected += OnLogon;
-                tikTok.MessageReceived += NewChat;
-                tikTok.StatusMessageReceived += OnStatus;
+                _tiktok.ConnectToStreamAsync(appSettings.LoadSetting("TikTokUserName"));
+                _tiktok.Connected += OnLogon;
+                _tiktok.MessageReceived += NewChat;
+                _tiktok.StatusMessageReceived += OnStatus;
             }
             this.AppChat("Welcome");
 

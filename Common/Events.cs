@@ -3,7 +3,7 @@ using System;
 
 namespace Streamer_Universal_Chat_Application.Common
 {
-    internal class Events
+    public class Events
     {
         public class MessageReceivedEventArgs : EventArgs
         {

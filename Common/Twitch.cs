@@ -14,41 +14,99 @@ using Windows.UI;
 using static Streamer_Universal_Chat_Application.Common.Events;
 using System.Threading.Tasks;
 using TwitchLib.Api.Helix.Models.Chat.Badges.GetChannelChatBadges;
+using System.Threading;
+using TikTokLiveSharp.Client;
 
 namespace Streamer_Universal_Chat_Application.Common
 {
-    class Twitch
+    public class Twitch
     {
         private TwitchClient client;
-
+        private static Twitch _instance;
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
         public event EventHandler<LogEventArgs> Log;
         public event EventHandler<ConnectedEventArgs> Connected;
         public event EventHandler<StatusMessageEventArgs> StatusMessageReceived;
 
-
-        public Twitch(String twitchUser, String twitchToken, String twitchChannel)
+        private Twitch()
         {
-            ConnectionCredentials credentials = new ConnectionCredentials(twitchUser, twitchToken);
-            var clientOptions = new ClientOptions
+
+        }
+
+        public static Twitch Instance
+        {
+            get
             {
-                MessagesAllowedInPeriod = 750,
-                ThrottlingPeriod = TimeSpan.FromSeconds(30) 
-            };
-            WebSocketClient customClient = new WebSocketClient(clientOptions);
-            client = new TwitchClient(customClient);
-            client.WillReplaceEmotes = true;
+                if (_instance == null)
+                {
+                    _instance = new Twitch();
+                }
+                return _instance;
+            }
+        }
 
-            client.Initialize(credentials, twitchChannel);
+        public async void ConnectToStreamAsync(String twitchUser, String twitchToken, String twitchChannel, Action<Exception> onConnectException = null)
+        {
+            await ConnectToStream(twitchUser, twitchToken, twitchChannel, onConnectException);
+        }
 
-            client.OnLog += Client_OnLog;
-            client.OnJoinedChannel += Client_OnJoinedChannel;
-            client.OnMessageReceived += Client_OnMessageReceived;
-            client.OnWhisperReceived += Client_OnWhisperReceived;
-            client.OnNewSubscriber += Client_OnNewSubscriber;
-            client.OnConnected += Client_OnConnected;
+        public async Task ConnectToStream(String twitchUser, String twitchToken, String twitchChannel, Action<Exception> onConnectException = null)
+        {
+            try
+            {
+                if (client != null)
+                {
+                    Debug.WriteLine("Disconnecting Existing Client");
+                    await DisconnectFromLivestream();
+                }
 
-            client.Connect();
+                Debug.WriteLine("Creating new Twitch Cllient");
+                ConnectionCredentials credentials = new ConnectionCredentials(twitchUser, twitchToken);
+                var clientOptions = new ClientOptions
+                {
+                    MessagesAllowedInPeriod = 750,
+                    ThrottlingPeriod = TimeSpan.FromSeconds(30)
+                };
+                WebSocketClient customClient = new WebSocketClient(clientOptions);
+                client = new TwitchClient(customClient);
+                client.WillReplaceEmotes = true;
+                client.Initialize(credentials, twitchChannel);
+                Debug.WriteLine($"Created new Client with HostName {twitchChannel}");
+                Debug.WriteLine("Connecting Events to Client");
+                SetupEvents(client);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                onConnectException?.Invoke(e);
+                return;
+            }
+            try
+            {
+                client.Connect();
+                Debug.WriteLine("Twitch Connected");
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                onConnectException?.Invoke(e);
+            }
+        }
+
+        public async void DisconnectFromLivestreamAsync() => await DisconnectFromLivestream();
+
+        public async Task DisconnectFromLivestream()
+        {
+            if (client != null)
+            {
+                Debug.WriteLine("Disconnecting Client");
+                client.Disconnect();
+                Debug.WriteLine("Removing EventListeners from Client");
+                TearDownEvents(client);
+                client = null;
+            }
+            await Task.Delay(200);
+            Debug.WriteLine("Stopping Threads");
         }
 
         private void Client_OnLog(object sender, OnLogArgs e)
@@ -100,7 +158,7 @@ namespace Streamer_Universal_Chat_Application.Common
             e.ChatMessage.EmoteSet.Emotes.ForEach(emote =>
             {
                 message = message.Replace(emote.Name, emote.ImageUrl);
-            });            
+            });
 
             if (e.ChatMessage.EmoteReplacedMessage != null)
             {
@@ -148,6 +206,26 @@ namespace Streamer_Universal_Chat_Application.Common
             // Verifica se ci sono handler registrati per l'evento
             StatusMessageReceived?.Invoke(this, e);
         }
+
+        private void SetupEvents(TwitchClient client)
+        {
+            client.OnLog += Client_OnLog;
+            client.OnJoinedChannel += Client_OnJoinedChannel;
+            client.OnMessageReceived += Client_OnMessageReceived;
+            client.OnWhisperReceived += Client_OnWhisperReceived;
+            client.OnNewSubscriber += Client_OnNewSubscriber;
+            client.OnConnected += Client_OnConnected;
+        }
+        private void TearDownEvents(TwitchClient client)
+        {
+            client.OnLog -= Client_OnLog;
+            client.OnJoinedChannel -= Client_OnJoinedChannel;
+            client.OnMessageReceived -= Client_OnMessageReceived;
+            client.OnWhisperReceived -= Client_OnWhisperReceived;
+            client.OnNewSubscriber -= Client_OnNewSubscriber;
+            client.OnConnected -= Client_OnConnected;
+        }
+
     }
 
 }

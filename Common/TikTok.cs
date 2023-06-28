@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using TikTokLiveSharp.Client;
 using TikTokLiveSharp.Events.MessageData.Messages;
 using Windows.UI;
@@ -9,40 +11,88 @@ using static Streamer_Universal_Chat_Application.Common.Events;
 
 namespace Streamer_Universal_Chat_Application.Common
 {
-    internal class TikTok
+    public class TikTok
     {
         public event EventHandler<StatusMessageEventArgs> StatusMessageReceived;
         public event EventHandler<ConnectedEventArgs> Connected;
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
-        private readonly TikTokLiveClient client;
+        private static TikTok _instance;
+        private readonly String _TikTokUser;
+        protected TikTokLiveClient client;
+        private ClientSettings settings;
+        protected CancellationTokenSource tokenSource = new CancellationTokenSource();
 
-        public TikTok(String tikTokUser)
+        private TikTok()
         {
-            client = new TikTokLiveClient(tikTokUser);
-            client.OnConnected += Client_OnConnected;
-            client.OnDisconnected += Client_OnDisconnected;
-            client.OnViewerData += Client_OnViewerData;
-            client.OnLiveEnded += Client_OnLiveEnded;
-            client.OnJoin += Client_OnJoin;
-            client.OnComment += Client_OnComment;
-            client.OnFollow += Client_OnFollow;
-            client.OnShare += Client_OnShare;
-            client.OnSubscribe += Client_OnSubscribe;
-            client.OnLike += Client_OnLike;
-            client.OnGiftMessage += Client_OnGiftMessage;
-            client.OnEmote += Client_OnEmote;
-            client.OnException += Client_Error;
-            //try
-            //{
-                client.Start(new System.Threading.CancellationToken(), Client_Error, true);
-                //client.Run(new System.Threading.CancellationToken());
-            //}
-            //catch (Exception e)
-            //{
-            //    this.StatusMessage(e.Message);
-            //    Debug.WriteLine(e.Message);
-            //    Debug.WriteLine(e.StackTrace);
-            //}
+
+        }
+
+        public static TikTok Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new TikTok();
+                }
+                return _instance;
+            }
+        }
+
+        public async void ConnectToStreamAsync(string userID, Action<Exception> onConnectException = null)
+        {
+            await ConnectToStream(userID, onConnectException);
+        }
+        public async Task ConnectToStream(string userID, Action<Exception> onConnectException = null)
+        {
+            try
+            {
+                if (client != null)
+                {
+                    Debug.WriteLine("Disconnecting Existing Client");
+                    await DisconnectFromLivestream();
+                }
+
+                Debug.WriteLine("Creating new TikTokLiveClient");
+                client = new TikTokLiveClient(userID, settings, null);
+                Debug.WriteLine($"Created new Client with HostName {userID}");
+                Debug.WriteLine("Connecting Events to Client");
+                SetupEvents(client);
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                onConnectException?.Invoke(e);
+                return;
+            }
+            try
+            {
+                await client.Start(tokenSource.Token, Client_Error, settings.RetryOnConnectionFailure);
+                Debug.WriteLine("Connected");
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                onConnectException?.Invoke(e);
+            }
+        }
+
+        public async void DisconnectFromLivestreamAsync() => await DisconnectFromLivestream();
+
+        public async Task DisconnectFromLivestream()
+        {
+            if (client != null)
+            {
+                Debug.WriteLine("Disconnecting Client");
+                await client.Stop();
+                Debug.WriteLine("Removing EventListeners from Client");
+                TearDownEvents(client);
+                client = null;
+            }
+            await Task.Delay(200);
+            Debug.WriteLine("Stopping Threads");
+            tokenSource?.Cancel();
+            tokenSource = new CancellationTokenSource();
         }
 
         private void Client_Error(object sender, Exception e)
@@ -162,7 +212,37 @@ namespace Streamer_Universal_Chat_Application.Common
             return pointOfReference.AddTicks(ticks);
         }
 
-    }
+        private void SetupEvents(TikTokLiveClient client)
+        {
+            client.OnConnected += Client_OnConnected;
+            client.OnDisconnected += Client_OnDisconnected;
+            client.OnViewerData += Client_OnViewerData;
+            client.OnLiveEnded += Client_OnLiveEnded;
+            client.OnJoin += Client_OnJoin;
+            client.OnComment += Client_OnComment;
+            client.OnFollow += Client_OnFollow;
+            client.OnShare += Client_OnShare;
+            client.OnSubscribe += Client_OnSubscribe;
+            client.OnLike += Client_OnLike;
+            client.OnGiftMessage += Client_OnGiftMessage;
+            client.OnEmote += Client_OnEmote;
+        }
+        private void TearDownEvents(TikTokLiveClient client)
+        {
+            client.OnConnected -= Client_OnConnected;
+            client.OnDisconnected -= Client_OnDisconnected;
+            client.OnViewerData -= Client_OnViewerData;
+            client.OnLiveEnded -= Client_OnLiveEnded;
+            client.OnJoin -= Client_OnJoin;
+            client.OnComment -= Client_OnComment;
+            client.OnFollow -= Client_OnFollow;
+            client.OnShare -= Client_OnShare;
+            client.OnSubscribe -= Client_OnSubscribe;
+            client.OnLike -= Client_OnLike;
+            client.OnGiftMessage -= Client_OnGiftMessage;
+            client.OnEmote -= Client_OnEmote;
+        }
 
+    }
 
 }
