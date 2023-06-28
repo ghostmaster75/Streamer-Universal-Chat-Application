@@ -104,7 +104,6 @@ namespace Streamer_Universal_Chat_Application.Common
             var times = pointOfReference.AddTicks(ticks);
             //System.Collections.Generic.List<TikTokLiveSharp.Events.MessageData.Objects.Badge> badges = e.User.Badges;
 
-
             List<KeyValuePair<string, string>> badges = new List<KeyValuePair<string, string>>();
 
             ChatRow chatRow = new ChatRow(Sources.Tiktok, Costant.TikTokLogo, e.User.NickName,badges, e.Text, times.ToString("dd-MM-yyy HH:mm:ss"), color);

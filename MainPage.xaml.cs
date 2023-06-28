@@ -19,7 +19,7 @@ namespace Streamer_Universal_Chat_Application
         private AppSettings appSettings = new AppSettings();
         private ListView chatListView;
         private BuildRow BuildRow = new BuildRow();
-
+        private Twitch twitch;
 
         public MainPage()
         {
@@ -31,7 +31,7 @@ namespace Streamer_Universal_Chat_Application
         {
             if ((appSettings.LoadSetting("TwitchUsername") != null && appSettings.LoadSetting("TwitchToken") != null && appSettings.LoadSetting("TwitchChannel") != null) && appSettings.LoadSetting("TwitchEnable") == "True")
             {
-                Twitch twitch = new Twitch(appSettings.LoadSetting("TwitchUsername"), appSettings.LoadSetting("TwitchToken"), appSettings.LoadSetting("TwitchChannel"));
+                twitch = new Twitch(appSettings.LoadSetting("TwitchUsername"), appSettings.LoadSetting("TwitchToken"), appSettings.LoadSetting("TwitchChannel"));
                 twitch.MessageReceived += NewChat;
                 twitch.Connected += OnLogon;
                 twitch.StatusMessageReceived += OnStatus;
@@ -65,12 +65,14 @@ namespace Streamer_Universal_Chat_Application
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
-                if (sender is Twitch) {
+                if (sender is Twitch)
+                {
                     if (e.IsConnected)
                     {
                         TwitchLed.Fill = new SolidColorBrush(Colors.Green);
                     }
-                    else {
+                    else
+                    {
                         TwitchLed.Fill = new SolidColorBrush(Colors.Red);
                     }
                 }
@@ -79,8 +81,10 @@ namespace Streamer_Universal_Chat_Application
                     if (e.IsConnected)
                     {
                         TikTokLed.Fill = new SolidColorBrush(Colors.Green);
-                    } else { 
-                        TikTokLed.Fill = new SolidColorBrush(Colors.Red); 
+                    }
+                    else
+                    {
+                        TikTokLed.Fill = new SolidColorBrush(Colors.Red);
                     }
                 }
 
@@ -91,6 +95,7 @@ namespace Streamer_Universal_Chat_Application
         {
             await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
+
                 if (e.ChatRow.ChatText != null)
                 {
                     Grid grid = BuildRow.Make(e.ChatRow);
