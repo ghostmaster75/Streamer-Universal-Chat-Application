@@ -1,21 +1,15 @@
 ﻿using Streamer_Universal_Chat_Application.Models;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.ServiceModel.Dispatcher;
+using System.Threading.Tasks;
 using TwitchLib.Client;
 using TwitchLib.Client.Enums;
 using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
-using TwitchLib.Api.Helix;
 using Windows.UI;
 using static Streamer_Universal_Chat_Application.Common.Events;
-using System.Threading.Tasks;
-using TwitchLib.Api.Helix.Models.Chat.Badges.GetChannelChatBadges;
-using System.Threading;
-using TikTokLiveSharp.Client;
 
 namespace Streamer_Universal_Chat_Application.Common
 {

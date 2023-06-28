@@ -89,10 +89,12 @@ namespace Streamer_Universal_Chat_Application
             if (success)
             {
                 twitchEnable = value;
-            } else { 
+            }
+            else
+            {
                 twitchEnable = true; ;
             }
-            
+
 
             twitchUsername = settings.LoadSetting("TwitchUsername");
             twitchToken = settings.LoadSetting("TwitchToken");
@@ -124,7 +126,7 @@ namespace Streamer_Universal_Chat_Application
             settings.SaveSetting("TwitchToken", passwordBoxTwitchToken.Password);
             settings.SaveSetting("TwitchChannel", textBoxTwitchChannel.Text);
             settings.SaveSetting("TiktokEnable", TiktokEnable.IsOn.ToString());
-            settings.SaveSetting("TikTokUserName", textBoxTikTokUserName.Text.Replace("@",""));
+            settings.SaveSetting("TikTokUserName", textBoxTikTokUserName.Text.Replace("@", ""));
             this.LoadSettings();
             this.DisableButtons();
         }
@@ -168,7 +170,7 @@ namespace Streamer_Universal_Chat_Application
 
         private Boolean IsSettingsChanged()
         {
-            if (textBoxTwitchUser.Text != twitchUsername || passwordBoxTwitchToken.Password != twitchToken || textBoxTwitchChannel.Text != twitchChannel || textBoxTikTokUserName.Text != tikTokUserName || toogleSwitchTwitchEnable.IsOn != twitchEnable || toogleSwitchTikTokEnable.IsOn != tikTokEnable )
+            if (textBoxTwitchUser.Text != twitchUsername || passwordBoxTwitchToken.Password != twitchToken || textBoxTwitchChannel.Text != twitchChannel || textBoxTikTokUserName.Text != tikTokUserName || toogleSwitchTwitchEnable.IsOn != twitchEnable || toogleSwitchTikTokEnable.IsOn != tikTokEnable)
             {
                 return true;
             }

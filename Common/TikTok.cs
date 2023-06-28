@@ -134,7 +134,7 @@ namespace Streamer_Universal_Chat_Application.Common
         {
             this.StatusMessage("TikTok host ended stream");
             Debug.WriteLine("Host ended Stream!");
-            client.Stop();  
+            client.Stop();
         }
 
         private static void Client_OnJoin(TikTokLiveClient sender, Join e)
@@ -146,7 +146,7 @@ namespace Streamer_Universal_Chat_Application.Common
         {
             Debug.WriteLine($"{e.User.UniqueId}: {e.Text}");
 
-            Color color = new Color();            
+            Color color = new Color();
             var uiSettings = new Windows.UI.ViewManagement.UISettings();
             color = uiSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Accent);
             DateTime pointOfReference = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
@@ -156,7 +156,7 @@ namespace Streamer_Universal_Chat_Application.Common
 
             List<KeyValuePair<string, string>> badges = new List<KeyValuePair<string, string>>();
 
-            ChatRow chatRow = new ChatRow(Sources.Tiktok, Costant.TikTokLogo, e.User.NickName,badges, e.Text, times.ToString("dd-MM-yyy HH:mm:ss"), color);
+            ChatRow chatRow = new ChatRow(Sources.Tiktok, Costant.TikTokLogo, e.User.NickName, badges, e.Text, times.ToString("dd-MM-yyy HH:mm:ss"), color);
 
             OnMessageReceived(new MessageReceivedEventArgs(chatRow));
         }

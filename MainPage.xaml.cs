@@ -10,8 +10,6 @@ using Windows.UI.Xaml.Media;
 using static Streamer_Universal_Chat_Application.Common.Events;
 using Color = Windows.UI.Color;
 
-// Il modello di elemento Pagina vuota è documentato all'indirizzo https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x410
-
 namespace Streamer_Universal_Chat_Application
 {
     public sealed partial class MainPage : Page
