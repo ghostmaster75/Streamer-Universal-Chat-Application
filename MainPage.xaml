@@ -14,10 +14,21 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
-            <CommandBar x:Name="MenuBar" Grid.ColumnSpan="2" DefaultLabelPosition="Right">
+            <CommandBar x:Name="MenuBar" Grid.ColumnSpan="2" DefaultLabelPosition="Right" OverflowButtonVisibility="Collapsed">
                 <CommandBar.Content>
                     <Grid/>
                 </CommandBar.Content>
+                <AppBarButton x:Name="fontplus" LabelPosition="Collapsed" Label="" Icon="FontIncrease" Click="OnElementClicked" >
+                    <ToolTipService.ToolTip>
+                        <ToolTip x:Uid="FontPlusTooltip"/>
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarButton x:Name="fontminus" LabelPosition="Collapsed" Label="" Icon="FontDecrease" Click="OnElementClicked">
+                    <ToolTipService.ToolTip>
+                        <ToolTip x:Uid="FontMinusTooltip"/>
+                    </ToolTipService.ToolTip>
+                </AppBarButton>
+                <AppBarSeparator IsEnabled="False"/>
                 <AppBarButton x:Name="settings" Icon="Setting" x:Uid="Settings"  Click="OnElementClicked"/>
                 <AppBarButton x:Name="about" Icon="Help" x:Uid="About"  Click="OnElementClicked"/>
             </CommandBar>

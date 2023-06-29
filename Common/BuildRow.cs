@@ -17,6 +17,7 @@ namespace Streamer_Universal_Chat_Application.Common
 {
     internal class BuildRow
     {
+        private AppSettings appSettings = new AppSettings();
         public BuildRow() { }
 
         private void ProcessEmoji(Common.Sources source, Boolean isNickColor, Color color, string text, RichTextBlock richTextBlock)
@@ -108,7 +109,7 @@ namespace Streamer_Universal_Chat_Application.Common
             grid.Children.Add(ellipse);
 
             RichTextBlock chatText = new RichTextBlock();
-            chatText.FontSize = 18;
+            chatText.FontSize = Double.Parse(appSettings.LoadSetting("fontsize"));
             var uiSettings = new Windows.UI.ViewManagement.UISettings();
             Color color;
             if (chatRow.UserColor != null)

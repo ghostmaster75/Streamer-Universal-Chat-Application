@@ -23,11 +23,20 @@ namespace Streamer_Universal_Chat_Application
         private Twitch _twitch = Twitch.Instance;
         private TikTok _tiktok = TikTok.Instance;
         private ResourceLoader _resourceLoader = ResourceLoader.GetForCurrentView("Resources");
+        private double _fontsize;
 
         public MainPage()
         {
             this.InitializeComponent();
             chatListView = (ListView)FindName("ChatListView");
+            if (appSettings.LoadSetting("fontsize") != null)
+            {
+                _fontsize = Double.Parse(appSettings.LoadSetting("fontsize"));
+            }
+            else {
+                _fontsize = 18;
+                appSettings.SaveSetting("fontsize",_fontsize.ToString());
+            }
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -110,13 +119,36 @@ namespace Streamer_Universal_Chat_Application
         private void OnElementClicked(object sender, RoutedEventArgs e)
         {
             var selectedFlyoutItem = sender as AppBarButton;
-            if (selectedFlyoutItem.Name == "settings")
+            IEnumerable<RichTextBlock> richTextBlocks = FindChildren<RichTextBlock>(this);
+
+            switch (selectedFlyoutItem.Name)
             {
-                Frame.Navigate(typeof(Settings));
-            }
-            if (selectedFlyoutItem.Name == "about")
-            {
-                Frame.Navigate(typeof(About));
+                case "settings":
+                    Frame.Navigate(typeof(Settings));
+                    break;
+                case "about":
+                    Frame.Navigate(typeof(About));
+                    break;
+                case "fontplus":
+                    _fontsize++;
+                    foreach(RichTextBlock richTextBlock in richTextBlocks)
+{
+                        richTextBlock.FontSize = _fontsize; // Imposta la nuova FontSize desiderata
+                    }
+                    appSettings.SaveSetting("fontsize", _fontsize.ToString());
+                    break;
+                case "fontminus":
+                    _fontsize--;
+                    if (_fontsize < 1.0) { 
+                        _fontsize = 1;
+                    }
+                    foreach (RichTextBlock richTextBlock in richTextBlocks)
+                    {
+                        richTextBlock.FontSize = _fontsize; // Imposta la nuova FontSize desiderata
+                    }
+                    appSettings.SaveSetting("fontsize", _fontsize.ToString());
+                    break;
+
             }
         }
 
@@ -130,6 +162,26 @@ namespace Streamer_Universal_Chat_Application
             chatListView.Items.Add(grid);
         }
 
+        public static IEnumerable<T> FindChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent != null)
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+                {
+                    DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+
+                    if (child != null && child is T)
+                    {
+                        yield return (T)child;
+                    }
+
+                    foreach (T descendant in FindChildren<T>(child))
+                    {
+                        yield return descendant;
+                    }
+                }
+            }
+        }
 
     }
 }

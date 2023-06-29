@@ -137,6 +137,12 @@ This disclaimer is subject to change without notice.</value>
   <data name="Follower" xml:space="preserve">
     <value>now following you.</value>
   </data>
+  <data name="FontMinusTooltip.Content" xml:space="preserve">
+    <value>Reduce Font</value>
+  </data>
+  <data name="FontPlusTooltip.Content" xml:space="preserve">
+    <value>Increase Font</value>
+  </data>
   <data name="GiftMessage" xml:space="preserve">
     <value>sent</value>
   </data>
