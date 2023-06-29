@@ -10,17 +10,17 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <CommandBar Grid.Row="0" IsOpen="False" DefaultLabelPosition="Right">
             <CommandBar.Content>
-                <TextBlock Margin="5" Text="Settings"></TextBlock>
+                <TextBlock VerticalAlignment="Center" Margin="9" x:Uid="SettingsTitle"></TextBlock>
             </CommandBar.Content>
-            <AppBarButton Icon="Back" Label="Back" Click="Back_Click" />
-            <AppBarButton x:Name="SaveButton" Icon="Save" Label="Save" IsEnabled="False" Click="Save_Click"/>
-            <AppBarButton x:Name="UndoButton" Icon="Undo" Label="Undo" IsEnabled="False" Click="Undo_Click"/>
+            <AppBarButton Icon="Back" x:Uid="Back" Click="Back_Click" />
+            <AppBarButton x:Name="SaveButton" Icon="Save" x:Uid="Save" IsEnabled="False" Click="Save_Click"/>
+            <AppBarButton x:Name="UndoButton" Icon="Undo" x:Uid="Undo" IsEnabled="False" Click="Undo_Click"/>
         </CommandBar>
         
         <Grid Grid.Row="1" Background="DarkViolet">
@@ -31,9 +31,9 @@
             <Image Grid.Column="0" Source="Assets\twitchicon.png" Width="90" />
             <StackPanel Grid.Column="1">
                 <ToggleSwitch x:Name="TwitchEnable"  Margin="15,15,15,0" Toggled="Enable_Click"/>
-                <TextBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" Header="Twitch Username:" PlaceholderText="Username"  x:Name="TwitchUserName" Margin="15,15,15,0" TextChanged="Settings_Changed" />
-                <PasswordBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" Header="Twitch Access Token: (go to https://twitchtokengenerator.com and generate new Bot Chat Token) " PlaceholderText="Access Token" x:Name="TwitchAccessToken"  Margin="15,15,15,0"/>
-                <TextBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" Header="Twitch Channel:" PlaceholderText="Channel" x:Name="TwitchChannel"  Margin="15,15,15,15" />
+                <TextBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" x:Uid="TwitchUsernameHeader"  x:Name="TwitchUserName" Margin="15,15,15,0" TextChanged="Settings_Changed" />
+                <PasswordBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" x:Uid="TwitchTokenHeader" x:Name="TwitchAccessToken"  Margin="15,15,15,0"/>
+                <TextBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" x:Uid="TwitchChannelHeader" x:Name="TwitchChannel"  Margin="15,15,15,15" />
             </StackPanel>
         </Grid>
         <Grid Grid.Row="2" Background="DarkGray">
@@ -44,7 +44,7 @@
             <Image Grid.Column="0" Source="Assets\tiktokicon.png" Width="90" />
             <StackPanel Grid.Column="1">
                 <ToggleSwitch x:Name="TiktokEnable"  Margin="15,15,15,0" Toggled="Enable_Click" />
-                <TextBox IsEnabled="{x:Bind TiktokEnable.IsOn, Mode=OneWay}" Header="TikTok Username:" PlaceholderText="Username"  x:Name="TikTokUserName" Margin="15,15,15,15" TextChanged="Settings_Changed" />
+                <TextBox IsEnabled="{x:Bind TiktokEnable.IsOn, Mode=OneWay}" x:Uid="TiktokUsernameHeader"  x:Name="TikTokUserName" Margin="15,15,15,15" TextChanged="Settings_Changed" />
             </StackPanel>
         </Grid>
     </Grid>

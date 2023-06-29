@@ -18,8 +18,8 @@
                 <CommandBar.Content>
                     <Grid/>
                 </CommandBar.Content>
-                <AppBarButton x:Name="settings" Icon="Setting" Label="Settings"  Click="OnElementClicked"/>
-                <AppBarButton x:Name="about" Icon="Help" Label="About"  Click="OnElementClicked"/>
+                <AppBarButton x:Name="settings" Icon="Setting" x:Uid="Settings"  Click="OnElementClicked"/>
+                <AppBarButton x:Name="about" Icon="Help" x:Uid="About"  Click="OnElementClicked"/>
             </CommandBar>
 
             <ListView x:Name="ChatListView" Margin="0,40,0,52" SelectionMode="None" Loaded="Page_Loaded">

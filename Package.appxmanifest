@@ -27,7 +27,7 @@
     <Resource Language="x-generate"/>
   </Resources>
 
-  <Applications>
+	<Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"
       EntryPoint="Streamer_Universal_Chat_Application.App">

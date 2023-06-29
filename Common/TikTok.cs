@@ -6,6 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using TikTokLiveSharp.Client;
 using TikTokLiveSharp.Events.MessageData.Messages;
+using Windows.ApplicationModel.Resources;
+using Windows.ApplicationModel.Resources.Core;
 using Windows.UI;
 using static Streamer_Universal_Chat_Application.Common.Events;
 
@@ -21,6 +23,7 @@ namespace Streamer_Universal_Chat_Application.Common
         protected TikTokLiveClient client;
         private ClientSettings settings;
         protected CancellationTokenSource tokenSource = new CancellationTokenSource();
+        private ResourceLoader _resourceLoader = ResourceLoader.GetForCurrentView("Resources");
 
         private TikTok()
         {
@@ -108,7 +111,7 @@ namespace Streamer_Universal_Chat_Application.Common
         private void Client_OnConnected(TikTokLiveClient sender, bool e)
         {
             OnConnected(new ConnectedEventArgs(e));
-            this.StatusMessage("TikTok is connected to room");
+            this.StatusMessage(_resourceLoader.GetString("TiktokConnected"));
             Debug.WriteLine($"Connected to Room! [Connected:{e}]");
         }
 
@@ -121,7 +124,7 @@ namespace Streamer_Universal_Chat_Application.Common
         private void Client_OnDisconnected(TikTokLiveClient sender, bool e)
         {
             OnConnected(new ConnectedEventArgs(e));
-            this.StatusMessage("TikTok is disconnected");
+            this.StatusMessage(_resourceLoader.GetString("TiktokDisconnected"));
             Debug.WriteLine($"Disconnected from Room! [Connected:{e}]");
         }
 
@@ -132,7 +135,7 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private void Client_OnLiveEnded(TikTokLiveClient sender, EventArgs e)
         {
-            this.StatusMessage("TikTok host ended stream");
+            this.StatusMessage(_resourceLoader.GetString("TiktokEndedStream"));
             Debug.WriteLine("Host ended Stream!");
             client.Stop();
         }
@@ -166,33 +169,39 @@ namespace Streamer_Universal_Chat_Application.Common
             MessageReceived?.Invoke(this, e);
         }
 
-        private static void Client_OnFollow(object sender, Follow e)
+        private void Client_OnFollow(object sender, Follow e)
         {
+            this.StatusMessage($"{e.NewFollower?.UniqueId} {_resourceLoader.GetString("Follower")}");
             Debug.WriteLine($"{e.NewFollower?.UniqueId} followed!");
         }
 
-        private static void Client_OnShare(TikTokLiveClient sender, Share e)
+        private void Client_OnShare(TikTokLiveClient sender, Share e)
         {
+            this.StatusMessage($"{e.User?.UniqueId} {_resourceLoader.GetString("Follower")}");
             Debug.WriteLine($"{e.User?.UniqueId} shared!");
         }
 
-        private static void Client_OnSubscribe(TikTokLiveClient sender, Subscribe e)
+        private void Client_OnSubscribe(TikTokLiveClient sender, Subscribe e)
         {
+            this.StatusMessage($"{e.NewSubscriber.UniqueId} {_resourceLoader.GetString("Subscriber")}");
             Debug.WriteLine($"{e.NewSubscriber.UniqueId} subscribed!");
         }
 
-        private static void Client_OnLike(TikTokLiveClient sender, Like e)
+        private void Client_OnLike(TikTokLiveClient sender, Like e)
         {
+            this.StatusMessage($"{e.Sender.UniqueId} {_resourceLoader.GetString("Liked")}");
             Debug.WriteLine($"{e.Sender.UniqueId} liked!");
         }
 
-        private static void Client_OnGiftMessage(TikTokLiveClient sender, GiftMessage e)
+        private void Client_OnGiftMessage(TikTokLiveClient sender, GiftMessage e)
         {
+            this.StatusMessage($"{e.Sender.UniqueId} {_resourceLoader.GetString("GiftMessage")} {e.Amount}x {e.Gift.Name}!");
             Debug.WriteLine($"{e.Sender.UniqueId} sent {e.Amount}x {e.Gift.Name}!");
         }
 
-        private static void Client_OnEmote(TikTokLiveClient sender, Emote e)
+        private void Client_OnEmote(TikTokLiveClient sender, Emote e)
         {
+            this.StatusMessage($"{e.User.UniqueId} {_resourceLoader.GetString("GiftMessage")} {e.EmoteId}!");
             Debug.WriteLine($"{e.User.UniqueId} sent {e.EmoteId}!");
         }
         private void StatusMessage(String message)

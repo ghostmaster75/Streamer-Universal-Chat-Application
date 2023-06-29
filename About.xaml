@@ -6,9 +6,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="20">
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
@@ -16,24 +17,35 @@
 
         <!-- App Bar -->
         <CommandBar Grid.Row="0" DefaultLabelPosition="Right">
-            <AppBarButton Icon="Back" Label="Back" Click="Back_Click"/>
+            <AppBarButton Icon="Back" x:Uid="Back" Click="Back_Click"/>
         </CommandBar>
 
         <!-- Content -->
-        <StackPanel Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Center">
-            <TextBlock Text="Streamer Universal Chat Application" FontSize="24" FontWeight="Bold" Margin="0,0,0,20" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
-            <TextBlock Text="Author: Piuerluigi 'Ghost' Natale" FontSize="16" Margin="0,0,0,10"/>
-            <TextBlock Text="Libraries used:" FontSize="16" Margin="0,0,0,10"/>
-            <HyperlinkButton Content="TwitchLib_Sharp"
-                             NavigateUri="https://github.com/TwitchLib/TwitchLib"
-                             FontSize="16"
-                             Margin="0,0,0,5"/>
-            <HyperlinkButton Content="TikTokLiveSharp"
-                             NavigateUri="https://github.com/frankvHoof93/TikTokLiveSharp"
-                             FontSize="16"
-                             Margin="0,0,0,20"/>
-            <TextBlock Text="Disclaimer:" FontSize="16" Margin="0,0,0,10"/>
-            <TextBlock TextWrapping="Wrap" Text="This application is not affiliated with, endorsed or specifically approved by Twitch or TikTok. It is not maintained, authorized or sponsored by Twitch, TikTok, or any of their affiliates, subsidiaries, or employees, and the trademarks are registered to their respective owners." FontSize="16"/>
+        <StackPanel Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="20" Height="Auto">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="70"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Image Grid.Column="0" Grid.RowSpan="2" Source="Assets/Square44x44Logo.altform-lightunplated_targetsize-256.png" Width="64" VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                <TextBlock Grid.Column="1" Grid.Row="0" Text="{x:Bind AppTitle}" FontSize="22" FontWeight="Bold" Margin="0,0,0,0" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
+                <TextBlock Grid.Column="1" Grid.Row="1" Text="{x:Bind AppVersion}" FontSize="10" FontWeight="Bold" Margin="0,0,0,20" Foreground="{ThemeResource SystemControlHighlightAccentBrush}"/>
+            </Grid>
+            <TextBlock Text="References:" FontSize="12" Margin="0,10,0,5"/>
+            <TextBlock FontSize="12">
+                <Hyperlink NavigateUri="https://github.com/TwitchLib/TwitchLib">TwitchLib</Hyperlink>
+                <Run FontSize="12"> -  MIT license</Run>
+            </TextBlock>
+            <TextBlock FontSize="12">
+                <Hyperlink NavigateUri="https://github.com/frankvHoof93/TikTokLiveSharp">TikTokLiveSharp</Hyperlink>
+                <Run > -  MIT license</Run>
+            </TextBlock>
+            <TextBlock Text="Disclaimer:" FontSize="12" Margin="0,20,0,10" FontWeight="SemiBold"/>
+            <TextBlock TextWrapping="Wrap"  x:Uid="Disclaimer" FontSize="12" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Auto" />
         </StackPanel>
     </Grid>
 </Page>

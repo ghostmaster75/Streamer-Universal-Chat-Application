@@ -8,6 +8,8 @@ using TwitchLib.Client.Events;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
+using Windows.ApplicationModel.Resources;
+using Windows.ApplicationModel.Resources.Core;
 using Windows.UI;
 using static Streamer_Universal_Chat_Application.Common.Events;
 
@@ -21,6 +23,7 @@ namespace Streamer_Universal_Chat_Application.Common
         public event EventHandler<LogEventArgs> Log;
         public event EventHandler<ConnectedEventArgs> Connected;
         public event EventHandler<StatusMessageEventArgs> StatusMessageReceived;
+        private ResourceLoader _resourceLoader = ResourceLoader.GetForCurrentView("Resources");
 
         private Twitch()
         {
@@ -117,7 +120,7 @@ namespace Streamer_Universal_Chat_Application.Common
         private void Client_OnConnected(object sender, OnConnectedArgs e)
         {
             OnConnected(new ConnectedEventArgs(true));
-            this.StatusMessage("Twitch joined");
+            this.StatusMessage(_resourceLoader.GetString("TwitchConnected"));
             Debug.WriteLine($"Connected to {e.AutoJoinChannel}");
         }
 
@@ -128,7 +131,8 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private void Client_OnJoinedChannel(object sender, OnJoinedChannelArgs e)
         {
-            client.SendMessage(e.Channel, "Hey guys! I am a bot connected via Streamer Universal Chat Application");
+            this.StatusMessage(_resourceLoader.GetString("TwitchJoined") + " " + e.Channel);
+            //client.SendMessage(e.Channel, "Hey guys! I am a bot connected via Streamer Universal Chat Application");
         }
 
         private void Client_OnMessageReceived(object sender, OnMessageReceivedArgs e)
@@ -177,16 +181,23 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private void Client_OnWhisperReceived(object sender, OnWhisperReceivedArgs e)
         {
-            if (e.WhisperMessage.Username == "my_friend")
-                client.SendWhisper(e.WhisperMessage.Username, "Hey! Whispers are so cool!!");
+            //if (e.WhisperMessage.Username == "my_friend")
+            //    client.SendWhisper(e.WhisperMessage.Username, "Hey! Whispers are so cool!!");
         }
 
         private void Client_OnNewSubscriber(object sender, OnNewSubscriberArgs e)
         {
+
             if (e.Subscriber.SubscriptionPlan == SubscriptionPlan.Prime)
-                client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points! So kind of you to use your Twitch Prime on this channel!");
+            {
+                this.StatusMessage($"{e.Subscriber.DisplayName} {_resourceLoader.GetString("SubscriberPrime")}");
+                //client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points! So kind of you to use your Twitch Prime on this channel!");
+            }
             else
-                client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points!");
+            {
+                this.StatusMessage($"{e.Subscriber.DisplayName} {_resourceLoader.GetString("Subscriber")}");
+                //client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points!");
+            }
         }
 
         private void StatusMessage(String message)

@@ -2,6 +2,9 @@
 using Streamer_Universal_Chat_Application.Models;
 using System;
 using System.Collections.Generic;
+using System.Resources;
+using Windows.ApplicationModel.Resources;
+using Windows.ApplicationModel.Resources.Core;
 using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
@@ -19,6 +22,7 @@ namespace Streamer_Universal_Chat_Application
         private BuildRow BuildRow = new BuildRow();
         private Twitch _twitch = Twitch.Instance;
         private TikTok _tiktok = TikTok.Instance;
+        private ResourceLoader _resourceLoader = ResourceLoader.GetForCurrentView("Resources");
 
         public MainPage()
         {
@@ -43,7 +47,7 @@ namespace Streamer_Universal_Chat_Application
                 _tiktok.MessageReceived += NewChat;
                 _tiktok.StatusMessageReceived += OnStatus;
             }
-            this.AppChat("Welcome");
+            this.AppChat(_resourceLoader.GetString("WelcomeMessage"));
 
         }
 
