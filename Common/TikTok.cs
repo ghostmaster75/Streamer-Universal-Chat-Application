@@ -100,12 +100,12 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private void Client_Error(object sender, Exception e)
         {
-            this.StatusMessage(e.Message);
+            this.StatusMessage($"Tiktok: {e.Message}");
         }
 
         private void Client_Error(Exception e)
         {
-            this.StatusMessage(e.Message);
+            this.StatusMessage($"Tiktok: {e.Message}");
         }
 
         private void Client_OnConnected(TikTokLiveClient sender, bool e)
@@ -171,31 +171,31 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private void Client_OnFollow(object sender, Follow e)
         {
-            this.StatusMessage($"{e.NewFollower?.UniqueId} {_resourceLoader.GetString("Follower")}");
+            this.StatusMessage($"👀 {e.NewFollower?.UniqueId} {_resourceLoader.GetString("Follower")}");
             Debug.WriteLine($"{e.NewFollower?.UniqueId} followed!");
         }
 
         private void Client_OnShare(TikTokLiveClient sender, Share e)
         {
-            this.StatusMessage($"{e.User?.UniqueId} {_resourceLoader.GetString("Follower")}");
+            this.StatusMessage($"⮫ {e.User?.UniqueId} {_resourceLoader.GetString("Follower")}");
             Debug.WriteLine($"{e.User?.UniqueId} shared!");
         }
 
         private void Client_OnSubscribe(TikTokLiveClient sender, Subscribe e)
         {
-            this.StatusMessage($"{e.NewSubscriber.UniqueId} {_resourceLoader.GetString("Subscriber")}");
+            this.StatusMessage($"🌟 {e.NewSubscriber.UniqueId} {_resourceLoader.GetString("Subscriber")}");
             Debug.WriteLine($"{e.NewSubscriber.UniqueId} subscribed!");
         }
 
         private void Client_OnLike(TikTokLiveClient sender, Like e)
         {
-            this.StatusMessage($"{e.Sender.UniqueId} {_resourceLoader.GetString("Liked")}");
+            this.StatusMessage($"❤ {e.Sender.UniqueId} {_resourceLoader.GetString("Liked")}");
             Debug.WriteLine($"{e.Sender.UniqueId} liked!");
         }
 
         private void Client_OnGiftMessage(TikTokLiveClient sender, GiftMessage e)
         {
-            this.StatusMessage($"{e.Sender.UniqueId} {_resourceLoader.GetString("GiftMessage")} {e.Amount}x {e.Gift.Name}!");
+            this.StatusMessage($"🎁 {e.Sender.UniqueId} {_resourceLoader.GetString("GiftMessage")} {e.Amount}x {e.Gift.Name}!");
             Debug.WriteLine($"{e.Sender.UniqueId} sent {e.Amount}x {e.Gift.Name}!");
         }
 

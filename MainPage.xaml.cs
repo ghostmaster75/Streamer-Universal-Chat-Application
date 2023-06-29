@@ -37,10 +37,7 @@ namespace Streamer_Universal_Chat_Application
                 _fontsize = 18;
                 appSettings.SaveSetting("fontsize",_fontsize.ToString());
             }
-        }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
             if ((appSettings.LoadSetting("TwitchUsername") != null && appSettings.LoadSetting("TwitchToken") != null && appSettings.LoadSetting("TwitchChannel") != null) && appSettings.LoadSetting("TwitchEnable") == "True")
             {
                 _twitch.ConnectToStreamAsync(appSettings.LoadSetting("TwitchUsername"), appSettings.LoadSetting("TwitchToken"), appSettings.LoadSetting("TwitchChannel"));
@@ -57,6 +54,11 @@ namespace Streamer_Universal_Chat_Application
                 _tiktok.StatusMessageReceived += OnStatus;
             }
             this.AppChat(_resourceLoader.GetString("WelcomeMessage"));
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+
 
         }
 

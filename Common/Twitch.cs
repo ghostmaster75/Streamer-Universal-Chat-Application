@@ -190,12 +190,12 @@ namespace Streamer_Universal_Chat_Application.Common
 
             if (e.Subscriber.SubscriptionPlan == SubscriptionPlan.Prime)
             {
-                this.StatusMessage($"{e.Subscriber.DisplayName} {_resourceLoader.GetString("SubscriberPrime")}");
+                this.StatusMessage($"🌟 {e.Subscriber.DisplayName} {_resourceLoader.GetString("SubscriberPrime")}");
                 //client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points! So kind of you to use your Twitch Prime on this channel!");
             }
             else
             {
-                this.StatusMessage($"{e.Subscriber.DisplayName} {_resourceLoader.GetString("Subscriber")}");
+                this.StatusMessage($"🌟{e.Subscriber.DisplayName} {_resourceLoader.GetString("Subscriber")}");
                 //client.SendMessage(e.Channel, $"Welcome {e.Subscriber.DisplayName} to the substers! You just earned 500 points!");
             }
         }

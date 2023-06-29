@@ -20,12 +20,12 @@ namespace Streamer_Universal_Chat_Application.Common
         private AppSettings appSettings = new AppSettings();
         public BuildRow() { }
 
-        private void ProcessEmoji(Common.Sources source, Boolean isNickColor, Color color, string text, RichTextBlock richTextBlock)
+        private void ProcessEmoji(Sources source, Boolean isNickColor, Color color, string text, RichTextBlock richTextBlock)
         {
             IReadOnlyDictionary<string, string> emoMapping = new Dictionary<string, string>();
             
-            if (source == Common.Sources.Twitch) {
-                emoMapping = Common.Costant.TwitchEmojiMappings;
+            if (source == Sources.Twitch) {
+                emoMapping = Costant.TwitchEmojiMappings;
             }
 
             string[] words = text.Split(' ');
