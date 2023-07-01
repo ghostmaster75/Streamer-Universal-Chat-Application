@@ -7,46 +7,59 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-        <CommandBar Grid.Row="0" IsOpen="False" DefaultLabelPosition="Right">
-            <CommandBar.Content>
-                <TextBlock VerticalAlignment="Center" Margin="9" x:Uid="SettingsTitle"></TextBlock>
-            </CommandBar.Content>
-            <AppBarButton Icon="Back" x:Uid="Back" Click="Back_Click" />
-            <AppBarButton x:Name="SaveButton" Icon="Save" x:Uid="Save" IsEnabled="False" Click="Save_Click"/>
-            <AppBarButton x:Name="UndoButton" Icon="Undo" x:Uid="Undo" IsEnabled="False" Click="Undo_Click"/>
-        </CommandBar>
-        
-        <Grid Grid.Row="1" Background="DarkViolet">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Image Grid.Column="0" Source="Assets\twitchicon.png" Width="90" />
-            <StackPanel Grid.Column="1">
-                <ToggleSwitch x:Name="TwitchEnable"  Margin="15,15,15,0" Toggled="Enable_Click"/>
-                <TextBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" x:Uid="TwitchUsernameHeader"  x:Name="TwitchUserName" Margin="15,15,15,0" TextChanged="Settings_Changed" />
-                <PasswordBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" x:Uid="TwitchTokenHeader" x:Name="TwitchAccessToken"  Margin="15,15,15,0"/>
-                <TextBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" x:Uid="TwitchChannelHeader" x:Name="TwitchChannel"  Margin="15,15,15,15" />
-            </StackPanel>
+    <ScrollViewer>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <CommandBar Grid.Row="0" IsOpen="False" DefaultLabelPosition="Right">
+                <CommandBar.Content>
+                    <TextBlock VerticalAlignment="Center" Margin="9" x:Uid="SettingsTitle"></TextBlock>
+                </CommandBar.Content>
+                <AppBarButton Icon="Back" x:Uid="Back" Click="Back_Click" />
+                <AppBarButton x:Name="SaveButton" Icon="Save" x:Uid="Save" IsEnabled="False" Click="Save_Click"/>
+                <AppBarButton x:Name="UndoButton" Icon="Undo" x:Uid="Undo" IsEnabled="False" Click="Undo_Click"/>
+            </CommandBar>
+            <Grid Grid.Row="1" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Image Grid.Column="0" Source="Assets\Square44x44Logo.altform-unplated_targetsize-256.png" Width="90" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <StackPanel>
+                        <TextBox x:Name="MaxHistoryLine" x:Uid="MaxHistoryLine" TextChanged="MaxHistoryLine_TextChanged" TextAlignment="Right" Margin="15,15,15,0" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="2" Background="DarkViolet">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Image Grid.Column="0" Source="Assets\twitchicon.png" Width="90" />
+                <StackPanel Grid.Column="1">
+                    <ToggleSwitch x:Name="TwitchEnable"  Margin="15,15,15,0" Toggled="Enable_Click"/>
+                    <TextBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" x:Uid="TwitchUsernameHeader"  x:Name="TwitchUserName" Margin="15,15,15,0" TextChanged="Settings_Changed" />
+                    <PasswordBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" x:Uid="TwitchTokenHeader" x:Name="TwitchAccessToken"  Margin="15,15,15,0" PasswordChanged="Settings_Changed"/>
+                    <TextBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" x:Uid="TwitchChannelHeader" x:Name="TwitchChannel"  Margin="15,15,15,0" TextChanged="Settings_Changed" />
+                    <TextBox IsEnabled="{x:Bind TwitchEnable.IsOn, Mode=OneWay}" x:Uid="TwitchClientIdHeader" x:Name="TwitchClientId"  Margin="15,15,15,15" TextChanged="Settings_Changed" />
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="3" Background="DarkGray">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Image Grid.Column="0" Source="Assets\tiktokicon.png" Width="90" />
+                <StackPanel Grid.Column="1">
+                    <ToggleSwitch x:Name="TiktokEnable"  Margin="15,15,15,0" Toggled="Enable_Click" />
+                    <TextBox IsEnabled="{x:Bind TiktokEnable.IsOn, Mode=OneWay}" x:Uid="TiktokUsernameHeader"  x:Name="TikTokUserName" Margin="15,15,15,15" TextChanged="Settings_Changed" />
+                </StackPanel>
+            </Grid>
         </Grid>
-        <Grid Grid.Row="2" Background="DarkGray">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="100"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Image Grid.Column="0" Source="Assets\tiktokicon.png" Width="90" />
-            <StackPanel Grid.Column="1">
-                <ToggleSwitch x:Name="TiktokEnable"  Margin="15,15,15,0" Toggled="Enable_Click" />
-                <TextBox IsEnabled="{x:Bind TiktokEnable.IsOn, Mode=OneWay}" x:Uid="TiktokUsernameHeader"  x:Name="TikTokUserName" Margin="15,15,15,15" TextChanged="Settings_Changed" />
-            </StackPanel>
-        </Grid>
-    </Grid>
-
+    </ScrollViewer>
 </Page>

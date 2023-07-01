@@ -12,6 +12,7 @@ using Windows.UI;
 using Windows.UI.Xaml.Shapes;
 using Windows.UI.Xaml;
 using Streamer_Universal_Chat_Application.Models;
+using System.Diagnostics;
 
 namespace Streamer_Universal_Chat_Application.Common
 {
@@ -121,16 +122,7 @@ namespace Streamer_Universal_Chat_Application.Common
                 color = uiSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Accent);
             }
 
-            var nickName = "";
-            chatRow.Badges.ForEach(badge =>
-            {
-                string badgeKey = badge.Key;
-                string badgeValue = badge.Value;
-                // not for now... i have to find badges imagerurl
-                //nickName += badgeValue + " ";
-            });
-            nickName += chatRow.NickName;
-            this.ProcessEmoji(chatRow.Source, true, color, nickName, chatText);
+            this.ProcessEmoji(chatRow.Source, true, color, chatRow.NickName, chatText);
 
             color = uiSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Foreground);
             this.ProcessEmoji(chatRow.Source, false, color, chatRow.ChatText, chatText);

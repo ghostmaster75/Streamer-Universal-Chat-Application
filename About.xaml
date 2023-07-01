@@ -8,7 +8,7 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
-
+    <ScrollViewer>
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" Margin="0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -48,4 +48,5 @@
             <TextBlock TextWrapping="Wrap"  x:Uid="Disclaimer" FontSize="12" ScrollViewer.VerticalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollMode="Auto" />
         </StackPanel>
     </Grid>
+    </ScrollViewer>
 </Page>

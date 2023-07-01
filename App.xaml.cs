@@ -1,6 +1,9 @@
 ﻿using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using Windows.Foundation;
+using Windows.Storage;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -49,6 +52,21 @@ namespace Streamer_Universal_Chat_Application
                 Window.Current.Content = rootFrame;
             }
 
+
+            ApplicationDataContainer localSettings = ApplicationData.Current.LocalSettings;
+            ApplicationView.GetForCurrentView().SetPreferredMinSize(new Size(500, 500));
+
+            // Controlla se è la prima volta che l'applicazione viene avviata
+            if (!localSettings.Values.ContainsKey("IsFirstLaunch"))
+            {
+                // Imposta la larghezza desiderata per la finestra
+
+                ApplicationView.GetForCurrentView().TryResizeView(new Size(500, Window.Current.Bounds.Height));
+
+                // Imposta il valore delle impostazioni dell'applicazione per indicare che non è il primo avvio
+                localSettings.Values["IsFirstLaunch"] = false;
+            }
+
             if (e.PrelaunchActivated == false)
             {
                 if (rootFrame.Content == null)
@@ -61,6 +79,8 @@ namespace Streamer_Universal_Chat_Application
                 // Assicurarsi che la finestra corrente sia attiva
                 Window.Current.Activate();
             }
+
+
         }
 
         /// <summary>

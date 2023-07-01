@@ -35,6 +35,7 @@ namespace Streamer_Universal_Chat_Application.Common
             }
         }
 
+
         public class StatusMessageEventArgs : EventArgs
         {
             public String StatusMessage { get; }
@@ -42,6 +43,16 @@ namespace Streamer_Universal_Chat_Application.Common
             public StatusMessageEventArgs(String statusMessage)
             {
                 StatusMessage = statusMessage;
+            }
+        }
+
+        public class StreamEventArgs : EventArgs
+        {
+            public String VieverCount { get; }
+
+            public StreamEventArgs(String vieverCount)
+            {
+                VieverCount = vieverCount;
             }
         }
     }

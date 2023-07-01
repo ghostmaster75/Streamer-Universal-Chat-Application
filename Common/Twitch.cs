@@ -12,6 +12,16 @@ using Windows.ApplicationModel.Resources;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.UI;
 using static Streamer_Universal_Chat_Application.Common.Events;
+using TwitchLib.Api;
+using TwitchLib.Api.Helix.Models.Users;
+using System.Collections.Generic;
+using TwitchLib.Api.Helix.Models.Streams.GetFollowedStreams;
+using TwitchLib.Api.Helix.Models.Streams.GetStreams;
+using Windows.UI.Xaml;
+using TwitchLib.Api.Helix.Models.Chat.Badges.GetChannelChatBadges;
+using TwitchLib.Api.Helix.Models.Chat.Badges;
+using TwitchLib.Api.Helix.Models.Chat.Badges.GetGlobalChatBadges;
+using System.Linq;
 
 namespace Streamer_Universal_Chat_Application.Common
 {
@@ -23,11 +33,19 @@ namespace Streamer_Universal_Chat_Application.Common
         public event EventHandler<LogEventArgs> Log;
         public event EventHandler<ConnectedEventArgs> Connected;
         public event EventHandler<StatusMessageEventArgs> StatusMessageReceived;
+        public event EventHandler<StreamEventArgs> StreamEvent;
         private ResourceLoader _resourceLoader = ResourceLoader.GetForCurrentView("Resources");
+        private static TwitchAPI api;
+        private GetFollowedStreamsResponse channelFollowers;
+        private GetStreamsResponse streams;
+        private String _twitchToken;
+        private String _twitchUser;
+        private DispatcherTimer timer;
+        private GetGlobalChatBadgesResponse globalBadges;
 
         private Twitch()
         {
-
+            api = new TwitchAPI();
         }
 
         public static Twitch Instance
@@ -42,12 +60,13 @@ namespace Streamer_Universal_Chat_Application.Common
             }
         }
 
-        public async void ConnectToStreamAsync(String twitchUser, String twitchToken, String twitchChannel, Action<Exception> onConnectException = null)
+        public async void ConnectToStreamAsync(String twitchUser, String twitchToken, String twitchChannel, String twitchClientId, Action<Exception> onConnectException = null)
         {
-            await ConnectToStream(twitchUser, twitchToken, twitchChannel, onConnectException);
+            await ConnectToStream(twitchUser, twitchToken, twitchChannel, twitchClientId, onConnectException);
+            await GetBadges();
         }
 
-        public async Task ConnectToStream(String twitchUser, String twitchToken, String twitchChannel, Action<Exception> onConnectException = null)
+        public async Task ConnectToStream(String twitchUser, String twitchToken, String twitchChannel, String twitchClientId, Action<Exception> onConnectException = null)
         {
             try
             {
@@ -56,6 +75,12 @@ namespace Streamer_Universal_Chat_Application.Common
                     Debug.WriteLine("Disconnecting Existing Client");
                     await DisconnectFromLivestream();
                 }
+
+                _twitchToken = twitchToken;
+                _twitchUser = twitchUser;
+
+                api.Settings.ClientId = twitchClientId;
+                api.Settings.AccessToken = twitchToken;
 
                 Debug.WriteLine("Creating new Twitch Cllient");
                 ConnectionCredentials credentials = new ConnectionCredentials(twitchUser, twitchToken);
@@ -70,6 +95,7 @@ namespace Streamer_Universal_Chat_Application.Common
                 client.Initialize(credentials, twitchChannel);
                 Debug.WriteLine($"Created new Client with HostName {twitchChannel}");
                 Debug.WriteLine("Connecting Events to Client");
+
                 SetupEvents(client);
             }
             catch (Exception e)
@@ -139,7 +165,7 @@ namespace Streamer_Universal_Chat_Application.Common
         {
             Color color = new Color();
             var uiSettings = new Windows.UI.ViewManagement.UISettings();
-            if (e.ChatMessage.Color != null)
+            if (e.ChatMessage.Color != null && e.ChatMessage.Color.Name != "0")
             {
                 // questo è un bug della libreria di twich che mette il valore di A alla fine della stringa invece che all'inizio
                 byte R = Convert.ToByte(e.ChatMessage.Color.Name.Substring(0, 2), 16);
@@ -151,6 +177,20 @@ namespace Streamer_Universal_Chat_Application.Common
             {
                 color = uiSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Accent);
             }
+
+            var nickName = "";
+            e.ChatMessage.Badges.ForEach(badge =>
+            {
+                BadgeEmoteSet[] emoteSet = globalBadges.EmoteSet;
+                BadgeEmoteSet matchingSet = emoteSet.FirstOrDefault(badgeImage => badgeImage.SetId == badge.Key);
+
+                if (matchingSet != null)
+                {
+                    nickName += matchingSet.Versions[0].ImageUrl1x + " ";
+                }
+            });
+            nickName += e.ChatMessage.DisplayName;
+
             String message = e.ChatMessage.Message;
 
             e.ChatMessage.EmoteSet.Emotes.ForEach(emote =>
@@ -165,7 +205,7 @@ namespace Streamer_Universal_Chat_Application.Common
 
 
 
-            ChatRow chatRow = new ChatRow(Common.Sources.Twitch, Common.Costant.TwitchLogo, e.ChatMessage.DisplayName, e.ChatMessage.Badges, message, e.ChatMessage.TmiSentTs, color);
+            ChatRow chatRow = new ChatRow(Common.Sources.Twitch, Common.Costant.TwitchLogo, nickName, e.ChatMessage.Badges, message, e.ChatMessage.TmiSentTs, color);
 
             OnMessageReceived(new MessageReceivedEventArgs(chatRow));
 
@@ -212,6 +252,51 @@ namespace Streamer_Universal_Chat_Application.Common
             StatusMessageReceived?.Invoke(this, e);
         }
 
+        public async Task GetLiveInfo()
+        {
+            List<string> userLists = new List<string> { _twitchUser };
+            streams = await api.Helix.Streams.GetStreamsAsync(userLogins: userLists, accessToken: _twitchToken);
+            if (streams != null && streams.Streams.Length > 0)
+            {
+                TwitchLib.Api.Helix.Models.Streams.GetStreams.Stream stream = streams.Streams[0];
+                Debug.WriteLine($"Viewer : {stream.ViewerCount}");
+                OnLiveInfo(new StreamEventArgs(stream.ViewerCount.ToString()));
+            }
+//            else {
+//                this.StatusMessage($"{ _resourceLoader.GetString("TwitchNoLive")}");
+//            }
+        }
+
+
+        private async Task GetBadges()
+        {
+            globalBadges = await api.Helix.Chat.GetGlobalChatBadgesAsync(accessToken: _twitchToken);
+
+            Debug.WriteLine(" ");
+        }
+
+        private async void GetLiveInfoAsync()
+        {
+            await GetLiveInfo();
+        }
+
+        protected virtual void OnLiveInfo(StreamEventArgs e)
+        {
+            StreamEvent?.Invoke(this, e);
+        }
+
+        private void Client_OnUserJoined(object sender, OnUserJoinedArgs e)
+        {
+            this.GetLiveInfoAsync();
+        }
+
+        private void Client_OnUserLeft(object sender, OnUserLeftArgs e)
+        {
+            this.GetLiveInfoAsync();
+        }
+
+
+
         private void SetupEvents(TwitchClient client)
         {
             client.OnLog += Client_OnLog;
@@ -219,8 +304,25 @@ namespace Streamer_Universal_Chat_Application.Common
             client.OnMessageReceived += Client_OnMessageReceived;
             client.OnWhisperReceived += Client_OnWhisperReceived;
             client.OnNewSubscriber += Client_OnNewSubscriber;
+            //client.OnGiftedSubscription += Client_GiftedSubscription;
+            //client.OnRaidNotification += Client_OnRaid;
+            // TODO: IMPLEMENTARE RESUSCRIBE - RAID - FOLLOW
             client.OnConnected += Client_OnConnected;
+            client.OnUserJoined += Client_OnUserJoined;
+            client.OnUserLeft += Client_OnUserLeft;
+
+            timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(30);
+            timer.Tick += Timer_Tick;
+            timer.Start();
         }
+
+        private void Timer_Tick(object sender, object e)
+        {
+            Debug.WriteLine("Tik");
+            this.GetLiveInfoAsync();
+        }
+
         private void TearDownEvents(TwitchClient client)
         {
             client.OnLog -= Client_OnLog;
@@ -229,6 +331,10 @@ namespace Streamer_Universal_Chat_Application.Common
             client.OnWhisperReceived -= Client_OnWhisperReceived;
             client.OnNewSubscriber -= Client_OnNewSubscriber;
             client.OnConnected -= Client_OnConnected;
+            client.OnUserJoined -= Client_OnUserJoined;
+            client.OnUserLeft -= Client_OnUserLeft;
+            timer.Tick -= Timer_Tick;
+            timer.Stop();
         }
 
     }

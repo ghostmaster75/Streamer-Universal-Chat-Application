@@ -1,5 +1,6 @@
 ﻿using Streamer_Universal_Chat_Application.Common;
 using System;
+using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -16,13 +17,17 @@ namespace Streamer_Universal_Chat_Application
         private String twitchUsername;
         private String twitchToken;
         private String twitchChannel;
+        private String twitchClientId;
         private Boolean tikTokEnable;
         private String tikTokUserName;
+        private int maxHistoryChat;
         private AppBarButton saveButton;
         private AppBarButton undoButton;
+        private TextBox textBoxMaxHistoryChat;
         private TextBox textBoxTwitchUser;
         private PasswordBox passwordBoxTwitchToken;
         private TextBox textBoxTwitchChannel;
+        private TextBox textBoxTwitchClientId;
         private TextBox textBoxTikTokUserName;
         private ToggleSwitch toogleSwitchTwitchEnable;
         private ToggleSwitch toogleSwitchTikTokEnable;
@@ -39,11 +44,18 @@ namespace Streamer_Universal_Chat_Application
             textBoxTwitchUser = (TextBox)FindName("TwitchUserName");
             passwordBoxTwitchToken = (PasswordBox)FindName("TwitchAccessToken");
             textBoxTwitchChannel = (TextBox)FindName("TwitchChannel");
+            textBoxTwitchClientId = (TextBox)FindName("TwitchClientId");
             toogleSwitchTikTokEnable = (ToggleSwitch)FindName("TiktokEnable");
             textBoxTikTokUserName = (TextBox)FindName("TikTokUserName");
+            textBoxMaxHistoryChat = (TextBox)FindName("MaxHistoryLine");
 
             toogleSwitchTikTokEnable.IsOn = tikTokEnable;
             toogleSwitchTwitchEnable.IsOn = twitchEnable;
+
+            if (maxHistoryChat > 0)
+            {
+                textBoxMaxHistoryChat.Text = maxHistoryChat.ToString();
+            }
 
             if (twitchUsername != null)
             {
@@ -72,6 +84,15 @@ namespace Streamer_Universal_Chat_Application
                 textBoxTwitchChannel.Text = "";
             }
 
+            if (twitchClientId != null)
+            {
+                textBoxTwitchClientId.Text = twitchClientId;
+            }
+            else
+            {
+                textBoxTwitchClientId.Text = "";
+            }
+
             if (tikTokUserName != null)
             {
                 textBoxTikTokUserName.Text = tikTokUserName;
@@ -95,10 +116,20 @@ namespace Streamer_Universal_Chat_Application
                 twitchEnable = true; ;
             }
 
+            int number;
+            if (int.TryParse(settings.LoadSetting("MaxHistoryChat"), out number))
+            {
+                maxHistoryChat = number;
+            }
+            else
+            {
+                maxHistoryChat = 100;
+            }
 
             twitchUsername = settings.LoadSetting("TwitchUsername");
             twitchToken = settings.LoadSetting("TwitchToken");
             twitchChannel = settings.LoadSetting("TwitchChannel");
+            twitchClientId = settings.LoadSetting("TwitchClientId");
 
             success = bool.TryParse(settings.LoadSetting("TiktokEnable"), out value);
             if (success)
@@ -114,19 +145,28 @@ namespace Streamer_Universal_Chat_Application
 
         }
 
+        private void SaveSettings() {
+            settings.SaveSetting("TwitchEnable", TwitchEnable.IsOn.ToString());
+            settings.SaveSetting("TwitchUsername", textBoxTwitchUser.Text);
+            settings.SaveSetting("TwitchToken", passwordBoxTwitchToken.Password);
+            settings.SaveSetting("TwitchChannel", textBoxTwitchChannel.Text);
+            settings.SaveSetting("TwitchClientId", textBoxTwitchClientId.Text);
+            settings.SaveSetting("TiktokEnable", TiktokEnable.IsOn.ToString());
+            settings.SaveSetting("TikTokUserName", textBoxTikTokUserName.Text.Replace("@", ""));
+            settings.SaveSetting("MaxHistoryChat", textBoxMaxHistoryChat.Text);
+        }
+
         private void Back_Click(object sender, RoutedEventArgs e)
         {
+            if (this.IsSettingsChanged()) {
+                this.SaveSettings();
+            }
             Frame.Navigate(typeof(MainPage));
         }
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            settings.SaveSetting("TwitchEnable", TwitchEnable.IsOn.ToString());
-            settings.SaveSetting("TwitchUsername", textBoxTwitchUser.Text);
-            settings.SaveSetting("TwitchToken", passwordBoxTwitchToken.Password);
-            settings.SaveSetting("TwitchChannel", textBoxTwitchChannel.Text);
-            settings.SaveSetting("TiktokEnable", TiktokEnable.IsOn.ToString());
-            settings.SaveSetting("TikTokUserName", textBoxTikTokUserName.Text.Replace("@", ""));
+            this.SaveSettings();
             this.LoadSettings();
             this.DisableButtons();
         }
@@ -137,8 +177,10 @@ namespace Streamer_Universal_Chat_Application
             textBoxTwitchUser.Text = twitchUsername;
             passwordBoxTwitchToken.Password = twitchToken;
             textBoxTwitchChannel.Text = twitchChannel;
+            textBoxTwitchClientId.Text = twitchClientId;
             toogleSwitchTikTokEnable.IsOn = tikTokEnable;
             textBoxTikTokUserName.Text = tikTokUserName;
+            textBoxMaxHistoryChat.Text = maxHistoryChat.ToString();
             this.DisableButtons();
         }
 
@@ -170,11 +212,46 @@ namespace Streamer_Universal_Chat_Application
 
         private Boolean IsSettingsChanged()
         {
-            if (textBoxTwitchUser.Text != twitchUsername || passwordBoxTwitchToken.Password != twitchToken || textBoxTwitchChannel.Text != twitchChannel || textBoxTikTokUserName.Text != tikTokUserName || toogleSwitchTwitchEnable.IsOn != twitchEnable || toogleSwitchTikTokEnable.IsOn != tikTokEnable)
+            if (textBoxMaxHistoryChat.Text != maxHistoryChat.ToString() 
+                || textBoxTwitchUser.Text != twitchUsername 
+                || passwordBoxTwitchToken.Password != twitchToken 
+                || textBoxTwitchChannel.Text != twitchChannel
+                || textBoxTwitchClientId.Text != twitchClientId
+                || textBoxTikTokUserName.Text != tikTokUserName 
+                || toogleSwitchTwitchEnable.IsOn != twitchEnable 
+                || toogleSwitchTikTokEnable.IsOn != tikTokEnable)
             {
                 return true;
             }
             return false;
+        }
+
+        private void MaxHistoryLine_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            TextBox textBox = (TextBox)sender;
+            string text = textBox.Text;
+
+            // Rimuovi i caratteri non numerici
+            string numericText = new string(text.Where(char.IsDigit).ToArray());
+
+            // Aggiorna il testo della TextBox con il risultato numerico
+            textBox.Text = numericText;
+            textBox.Select(numericText.Length, 0); // Imposta il cursore alla fine del testo
+
+            // Verifica il range numerico
+            int minValue = 0; // Valore minimo del range
+            int maxValue = 5000; // Valore massimo del range
+
+            if (int.TryParse(numericText, out int numericValue))
+            {
+                // Verifica se il valore numerico è nel range desiderato
+                if (numericValue < minValue || numericValue > maxValue)
+                {
+                    // Il valore numerico non è nel range, quindi reimposta il testo della TextBox con il valore più vicino nel range
+                    textBox.Text = Math.Min(Math.Max(numericValue, minValue), maxValue).ToString();
+                }
+            }
+            this.Settings_Changed(sender, e);
         }
     }
 }

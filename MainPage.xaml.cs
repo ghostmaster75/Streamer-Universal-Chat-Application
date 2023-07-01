@@ -3,6 +3,7 @@ using Streamer_Universal_Chat_Application.Models;
 using System;
 using System.Collections.Generic;
 using System.Resources;
+using TwitchLib.Api.Helix.Models.Streams.GetStreamMarkers;
 using Windows.ApplicationModel.Resources;
 using Windows.ApplicationModel.Resources.Core;
 using Windows.UI;
@@ -24,26 +25,53 @@ namespace Streamer_Universal_Chat_Application
         private TikTok _tiktok = TikTok.Instance;
         private ResourceLoader _resourceLoader = ResourceLoader.GetForCurrentView("Resources");
         private double _fontsize;
+        private bool _isTwitchOn = false;
+        private bool _isTiktokOn = false;
+        private int _maxHistory;
+        private TextBlock textBlockTwitchViewer;
+        private TextBlock textBlockTiktokViewer;
+        public String TwitchViewver { get; set; }
 
         public MainPage()
         {
             this.InitializeComponent();
             chatListView = (ListView)FindName("ChatListView");
+            textBlockTwitchViewer = (TextBlock)FindName("TwitchViewer");
+            textBlockTiktokViewer = (TextBlock)FindName("TiktokViewer");
             if (appSettings.LoadSetting("fontsize") != null)
             {
                 _fontsize = Double.Parse(appSettings.LoadSetting("fontsize"));
             }
-            else {
+            else
+            {
                 _fontsize = 18;
-                appSettings.SaveSetting("fontsize",_fontsize.ToString());
+                appSettings.SaveSetting("fontsize", _fontsize.ToString());
             }
 
-            if ((appSettings.LoadSetting("TwitchUsername") != null && appSettings.LoadSetting("TwitchToken") != null && appSettings.LoadSetting("TwitchChannel") != null) && appSettings.LoadSetting("TwitchEnable") == "True")
+            int number;
+            if (int.TryParse(appSettings.LoadSetting("MaxHistoryChat"), out number))
             {
-                _twitch.ConnectToStreamAsync(appSettings.LoadSetting("TwitchUsername"), appSettings.LoadSetting("TwitchToken"), appSettings.LoadSetting("TwitchChannel"));
+                _maxHistory = number;
+            }
+            else
+            {
+                _maxHistory = 100;
+            }
+        }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            if ((appSettings.LoadSetting("TwitchUsername") != null
+                && appSettings.LoadSetting("TwitchToken") != null
+                && appSettings.LoadSetting("TwitchChannel") != null
+                && appSettings.LoadSetting("TwitchClientId") != null)
+                && appSettings.LoadSetting("TwitchEnable") == "True")
+            {
+                _twitch.ConnectToStreamAsync(appSettings.LoadSetting("TwitchUsername"), appSettings.LoadSetting("TwitchToken"), appSettings.LoadSetting("TwitchChannel"), appSettings.LoadSetting("TwitchClientId"));
                 _twitch.MessageReceived += NewChat;
                 _twitch.Connected += OnLogon;
                 _twitch.StatusMessageReceived += OnStatus;
+                _twitch.StreamEvent += OnStreamInfo;
             }
 
             if (appSettings.LoadSetting("TikTokUserName") != null && appSettings.LoadSetting("TiktokEnable") == "True")
@@ -52,14 +80,51 @@ namespace Streamer_Universal_Chat_Application
                 _tiktok.Connected += OnLogon;
                 _tiktok.MessageReceived += NewChat;
                 _tiktok.StatusMessageReceived += OnStatus;
+                _tiktok.StreamEvent += OnStreamInfo;
             }
             this.AppChat(_resourceLoader.GetString("WelcomeMessage"));
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
+        private void Page_Unloaded(object sender, RoutedEventArgs e)
         {
 
+            if (_isTwitchOn)
+            {
+                _twitch.DisconnectFromLivestreamAsync();
+                _twitch.MessageReceived -= NewChat;
+                _twitch.Connected -= OnLogon;
+                _twitch.StatusMessageReceived -= OnStatus;
+                _twitch.StreamEvent -= OnStreamInfo;
+            }
 
+            if (_isTiktokOn)
+            {
+                _tiktok.DisconnectFromLivestreamAsync();
+                _tiktok.Connected -= OnLogon;
+                _tiktok.MessageReceived -= NewChat;
+                _tiktok.StatusMessageReceived -= OnStatus;
+                _tiktok.StreamEvent -= OnStreamInfo;
+            }
+
+        }
+
+        private async void OnStreamInfo(object sender, StreamEventArgs e)
+        {
+            if (sender is Twitch)
+            {
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    textBlockTwitchViewer.Text = e.VieverCount.ToString();
+                });
+            }
+
+            if (sender is TikTok)
+            {
+                await Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                {
+                    textBlockTiktokViewer.Text = e.VieverCount.ToString();
+                });
+            }
         }
 
         private async void OnStatus(object sender, StatusMessageEventArgs e)
@@ -81,6 +146,7 @@ namespace Streamer_Universal_Chat_Application
             {
                 if (sender is Twitch)
                 {
+                    _isTwitchOn = e.IsConnected;
                     if (e.IsConnected)
                     {
                         TwitchLed.Fill = new SolidColorBrush(Colors.Green);
@@ -92,6 +158,7 @@ namespace Streamer_Universal_Chat_Application
                 }
                 if (sender is TikTok)
                 {
+                    _isTiktokOn = e.IsConnected;
                     if (e.IsConnected)
                     {
                         TikTokLed.Fill = new SolidColorBrush(Colors.Green);
@@ -114,6 +181,10 @@ namespace Streamer_Universal_Chat_Application
                 {
                     Grid grid = BuildRow.Make(e.ChatRow);
                     chatListView.Items.Add(grid);
+                    if (chatListView.Items.Count > _maxHistory)
+                    {
+                        chatListView.Items.RemoveAt(0);
+                    }
                 }
             });
         }
@@ -133,15 +204,16 @@ namespace Streamer_Universal_Chat_Application
                     break;
                 case "fontplus":
                     _fontsize++;
-                    foreach(RichTextBlock richTextBlock in richTextBlocks)
-{
+                    foreach (RichTextBlock richTextBlock in richTextBlocks)
+                    {
                         richTextBlock.FontSize = _fontsize; // Imposta la nuova FontSize desiderata
                     }
                     appSettings.SaveSetting("fontsize", _fontsize.ToString());
                     break;
                 case "fontminus":
                     _fontsize--;
-                    if (_fontsize < 1.0) { 
+                    if (_fontsize < 1.0)
+                    {
                         _fontsize = 1;
                     }
                     foreach (RichTextBlock richTextBlock in richTextBlocks)
@@ -162,6 +234,10 @@ namespace Streamer_Universal_Chat_Application
             ChatRow appRow = new ChatRow(Common.Sources.Application, Common.Costant.RoundedLogo, "Streamer Universal Chat Application", badges, Message, "0", color);
             Grid grid = BuildRow.Make(appRow);
             chatListView.Items.Add(grid);
+            if (chatListView.Items.Count > _maxHistory)
+            {
+                chatListView.Items.RemoveAt(0);
+            }
         }
 
         public static IEnumerable<T> FindChildren<T>(DependencyObject parent) where T : DependencyObject

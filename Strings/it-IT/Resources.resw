@@ -149,6 +149,9 @@ Questo disclaimer può essere soggetto a modifiche senza preavviso.</value>
   <data name="Liked" xml:space="preserve">
     <value>ha messo mi piace</value>
   </data>
+  <data name="MaxHistoryLine.Header" xml:space="preserve">
+    <value>Limite massimo di righe chat visualizzabili</value>
+  </data>
   <data name="Save.Label" xml:space="preserve">
     <value>Salva</value>
   </data>
@@ -197,6 +200,12 @@ Questo disclaimer può essere soggetto a modifiche senza preavviso.</value>
   <data name="TwitchChannelHeader.PlaceholderText" xml:space="preserve">
     <value>Canale</value>
   </data>
+  <data name="TwitchClientIdHeader.Header" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
+  <data name="TwitchClientIdHeader.PlaceholderText" xml:space="preserve">
+    <value>Client ID</value>
+  </data>
   <data name="TwitchConnected" xml:space="preserve">
     <value>Twitch è connesso</value>
   </data>
@@ -205,6 +214,9 @@ Questo disclaimer può essere soggetto a modifiche senza preavviso.</value>
   </data>
   <data name="TwitchJoined" xml:space="preserve">
     <value>Twtich è entrato nel canale</value>
+  </data>
+  <data name="TwitchNoLive" xml:space="preserve">
+    <value>Twitch: Non ci sono live attive</value>
   </data>
   <data name="TwitchTokenHeader.Header" xml:space="preserve">
     <value>Token d'accesso Twitch: (vai su https://twitchtokengenerator.com e genera un nuovo Bot Chat Token)</value>

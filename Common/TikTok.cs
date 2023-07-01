@@ -18,6 +18,7 @@ namespace Streamer_Universal_Chat_Application.Common
         public event EventHandler<StatusMessageEventArgs> StatusMessageReceived;
         public event EventHandler<ConnectedEventArgs> Connected;
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+        public event EventHandler<StreamEventArgs> StreamEvent;
         private static TikTok _instance;
         private readonly String _TikTokUser;
         protected TikTokLiveClient client;
@@ -128,9 +129,15 @@ namespace Streamer_Universal_Chat_Application.Common
             Debug.WriteLine($"Disconnected from Room! [Connected:{e}]");
         }
 
-        private static void Client_OnViewerData(TikTokLiveClient sender, RoomViewerData e)
+        private void Client_OnViewerData(TikTokLiveClient sender, RoomViewerData e)
         {
+            OnLiveInfo(new StreamEventArgs(e.ViewerCount.ToString()));
             Debug.WriteLine($"Viewer count is: {e.ViewerCount}");
+        }
+
+        public virtual void OnLiveInfo(StreamEventArgs streamEventArgs)
+        {
+            StreamEvent?.Invoke(this, streamEventArgs);
         }
 
         private void Client_OnLiveEnded(TikTokLiveClient sender, EventArgs e)

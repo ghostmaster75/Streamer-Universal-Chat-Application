@@ -10,6 +10,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Grid x:Name="Container">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
@@ -32,8 +33,17 @@
                 <AppBarButton x:Name="settings" Icon="Setting" x:Uid="Settings"  Click="OnElementClicked"/>
                 <AppBarButton x:Name="about" Icon="Help" x:Uid="About"  Click="OnElementClicked"/>
             </CommandBar>
-
-            <ListView x:Name="ChatListView" Margin="0,40,0,52" SelectionMode="None" Loaded="Page_Loaded">
+        </Grid>
+        <Grid Grid.Row="1">
+            <ListView x:Name="ChatListView" 
+                      Margin="0,0,0,0" 
+                      SelectionMode="None" 
+                      Loaded="Page_Loaded" 
+                      Unloaded="Page_Unloaded"
+                      ShowsScrollingPlaceholders="True"
+                      BorderThickness="1"
+                      BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+            >
                 <ListView.ItemsPanel>
                     <ItemsPanelTemplate>
                         <ItemsStackPanel ItemsUpdatingScrollMode="KeepLastItemInView"
@@ -47,40 +57,42 @@
                 </ListView.ItemContainerStyle>
             </ListView>
         </Grid>
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal">
-                <Ellipse x:Name="TwitchLed"
+        <CommandBar  Grid.Row="2" x:Name="StatusBar" DefaultLabelPosition="Right" OverflowButtonVisibility="Collapsed" VerticalAlignment="Center">
+            <CommandBar.Content>
+                <StackPanel Grid.ColumnSpan="2" Orientation="Horizontal" Margin="5,0,0,0" Height="{Binding ElementName=StatusBar, Path=ActualHeight}" >
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" >
+                        <Ellipse x:Name="TwitchLed"
                             Grid.RowSpan="2"
                             Width ="10"
                             Height="10"
                             Margin="3"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left">
-                    <Ellipse.Fill>
-                        <SolidColorBrush Color="Red"/>
-                    </Ellipse.Fill>
-                </Ellipse>
-                <Image Source="Assets/twitchicon.png" Width="24" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            </StackPanel>
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10,0,0,0">
-                <Ellipse x:Name="TikTokLed"
+                            <Ellipse.Fill>
+                                <SolidColorBrush Color="Red"/>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                        <Image Source="Assets/twitchicon.png" Width="24" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="TwitchViewer" Text="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="10,0,0,0">
+                        <Ellipse x:Name="TikTokLed"
                             Grid.RowSpan="2"
                             Width ="10"
                             Height="10"
                             Margin="3"
                             VerticalAlignment="Center"
                             HorizontalAlignment="Left">
-                    <Ellipse.Fill>
-                        <SolidColorBrush Color="Red"/>
-                    </Ellipse.Fill>
-                </Ellipse>
-                <Image Source="Assets/tiktokicon.png" Width="24" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-            </StackPanel>
-        </Grid>
+                            <Ellipse.Fill>
+                                <SolidColorBrush Color="Red"/>
+                            </Ellipse.Fill>
+                        </Ellipse>
+                        <Image Source="Assets/tiktokicon.png" Width="24" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <TextBlock x:Name="TiktokViewer" Text="0" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+            </CommandBar.Content>
+        </CommandBar>
     </Grid>
 
 </Page>
