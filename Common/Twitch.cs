@@ -1,7 +1,14 @@
 ﻿using Streamer_Universal_Chat_Application.Models;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using TwitchLib.Api;
+using TwitchLib.Api.Helix.Models.Chat.Badges;
+using TwitchLib.Api.Helix.Models.Chat.Badges.GetGlobalChatBadges;
+using TwitchLib.Api.Helix.Models.Streams.GetFollowedStreams;
+using TwitchLib.Api.Helix.Models.Streams.GetStreams;
 using TwitchLib.Client;
 using TwitchLib.Client.Enums;
 using TwitchLib.Client.Events;
@@ -9,19 +16,9 @@ using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
 using Windows.ApplicationModel.Resources;
-using Windows.ApplicationModel.Resources.Core;
 using Windows.UI;
-using static Streamer_Universal_Chat_Application.Common.Events;
-using TwitchLib.Api;
-using TwitchLib.Api.Helix.Models.Users;
-using System.Collections.Generic;
-using TwitchLib.Api.Helix.Models.Streams.GetFollowedStreams;
-using TwitchLib.Api.Helix.Models.Streams.GetStreams;
 using Windows.UI.Xaml;
-using TwitchLib.Api.Helix.Models.Chat.Badges.GetChannelChatBadges;
-using TwitchLib.Api.Helix.Models.Chat.Badges;
-using TwitchLib.Api.Helix.Models.Chat.Badges.GetGlobalChatBadges;
-using System.Linq;
+using static Streamer_Universal_Chat_Application.Common.Events;
 
 namespace Streamer_Universal_Chat_Application.Common
 {
@@ -262,9 +259,9 @@ namespace Streamer_Universal_Chat_Application.Common
                 Debug.WriteLine($"Viewer : {stream.ViewerCount}");
                 OnLiveInfo(new StreamEventArgs(stream.ViewerCount.ToString()));
             }
-//            else {
-//                this.StatusMessage($"{ _resourceLoader.GetString("TwitchNoLive")}");
-//            }
+            //            else {
+            //                this.StatusMessage($"{ _resourceLoader.GetString("TwitchNoLive")}");
+            //            }
         }
 
 

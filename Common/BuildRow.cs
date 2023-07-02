@@ -1,18 +1,14 @@
-﻿using System;
+﻿using Streamer_Universal_Chat_Application.Models;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Windows.UI;
 using Windows.UI.Text;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Documents;
-using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Media;
-using Windows.UI;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Shapes;
-using Windows.UI.Xaml;
-using Streamer_Universal_Chat_Application.Models;
-using System.Diagnostics;
 
 namespace Streamer_Universal_Chat_Application.Common
 {
@@ -24,8 +20,9 @@ namespace Streamer_Universal_Chat_Application.Common
         private void ProcessEmoji(Sources source, Boolean isNickColor, Color color, string text, RichTextBlock richTextBlock)
         {
             IReadOnlyDictionary<string, string> emoMapping = new Dictionary<string, string>();
-            
-            if (source == Sources.Twitch) {
+
+            if (source == Sources.Twitch)
+            {
                 emoMapping = Costant.TwitchEmojiMappings;
             }
 

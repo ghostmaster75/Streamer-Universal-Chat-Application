@@ -2,10 +2,7 @@
 using Streamer_Universal_Chat_Application.Models;
 using System;
 using System.Collections.Generic;
-using System.Resources;
-using TwitchLib.Api.Helix.Models.Streams.GetStreamMarkers;
 using Windows.ApplicationModel.Resources;
-using Windows.ApplicationModel.Resources.Core;
 using Windows.UI;
 using Windows.UI.Core;
 using Windows.UI.Xaml;

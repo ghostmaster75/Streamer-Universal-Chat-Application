@@ -6,8 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using TikTokLiveSharp.Client;
 using TikTokLiveSharp.Events.MessageData.Messages;
+using TikTokLiveSharp.Events.MessageData.Objects;
 using Windows.ApplicationModel.Resources;
-using Windows.ApplicationModel.Resources.Core;
 using Windows.UI;
 using static Streamer_Universal_Chat_Application.Common.Events;
 
@@ -162,11 +162,37 @@ namespace Streamer_Universal_Chat_Application.Common
             DateTime pointOfReference = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             long ticks = (long)(e.TimeStamp / 100);
             var times = pointOfReference.AddTicks(ticks);
-            //System.Collections.Generic.List<TikTokLiveSharp.Events.MessageData.Objects.Badge> badges = e.User.Badges;
+            List<Badge> badges = e.User.Badges;
 
-            List<KeyValuePair<string, string>> badges = new List<KeyValuePair<string, string>>();
+            String nickName = e.User.NickName;
+            if (badges != null && badges.Count > 0)
+            {
+                badges.ForEach(delegate (Badge badge)
+                {
+                    foreach (TextBadge textBadge in badge.TextBadges)
+                    {
+                        Debug.WriteLine($"Text Badge - Type: {textBadge.Type} - Name: {textBadge.Name}");
+                        nickName += $" {textBadge.Name}";
+                    }
 
-            ChatRow chatRow = new ChatRow(Sources.Tiktok, Costant.TikTokLogo, e.User.NickName, badges, e.Text, times.ToString("dd-MM-yyy HH:mm:ss"), color);
+                    foreach (ImageBadge imageBadge in badge.ImageBadges)
+                    {
+                        Debug.WriteLine($"Image Badge - DisplayType: {imageBadge.DisplayType} - Image: {imageBadge.Image}");
+                        nickName += $" {imageBadge.Image}";
+                    }
+
+                    if (badge.ComboBadges != null)
+                    {
+                        Debug.WriteLine($"Image Badge - Data: {badge.ComboBadges.Data} - Image: {badge.ComboBadges.Image}");
+                        nickName += $" {badge.ComboBadges.Data}";
+                    }
+                });
+            }
+
+            //List<KeyValuePair<string, string>> badge = new List<KeyValuePair<string, string>>();
+
+
+            ChatRow chatRow = new ChatRow(Sources.Tiktok, Costant.TikTokLogo, e.User.NickName, null, e.Text, times.ToString("dd-MM-yyy HH:mm:ss"), color);
 
             OnMessageReceived(new MessageReceivedEventArgs(chatRow));
         }

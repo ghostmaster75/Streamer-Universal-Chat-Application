@@ -145,7 +145,8 @@ namespace Streamer_Universal_Chat_Application
 
         }
 
-        private void SaveSettings() {
+        private void SaveSettings()
+        {
             settings.SaveSetting("TwitchEnable", TwitchEnable.IsOn.ToString());
             settings.SaveSetting("TwitchUsername", textBoxTwitchUser.Text);
             settings.SaveSetting("TwitchToken", passwordBoxTwitchToken.Password);
@@ -158,7 +159,8 @@ namespace Streamer_Universal_Chat_Application
 
         private void Back_Click(object sender, RoutedEventArgs e)
         {
-            if (this.IsSettingsChanged()) {
+            if (this.IsSettingsChanged())
+            {
                 this.SaveSettings();
             }
             Frame.Navigate(typeof(MainPage));
@@ -212,13 +214,13 @@ namespace Streamer_Universal_Chat_Application
 
         private Boolean IsSettingsChanged()
         {
-            if (textBoxMaxHistoryChat.Text != maxHistoryChat.ToString() 
-                || textBoxTwitchUser.Text != twitchUsername 
-                || passwordBoxTwitchToken.Password != twitchToken 
+            if (textBoxMaxHistoryChat.Text != maxHistoryChat.ToString()
+                || textBoxTwitchUser.Text != twitchUsername
+                || passwordBoxTwitchToken.Password != twitchToken
                 || textBoxTwitchChannel.Text != twitchChannel
                 || textBoxTwitchClientId.Text != twitchClientId
-                || textBoxTikTokUserName.Text != tikTokUserName 
-                || toogleSwitchTwitchEnable.IsOn != twitchEnable 
+                || textBoxTikTokUserName.Text != tikTokUserName
+                || toogleSwitchTwitchEnable.IsOn != twitchEnable
                 || toogleSwitchTikTokEnable.IsOn != tikTokEnable)
             {
                 return true;
