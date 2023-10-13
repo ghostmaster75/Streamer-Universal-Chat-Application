@@ -285,7 +285,13 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private async Task GetBadges()
         {
-            globalBadges = await api.Helix.Chat.GetGlobalChatBadgesAsync(accessToken: _twitchToken);
+            try
+            {
+                globalBadges = await api.Helix.Chat.GetGlobalChatBadgesAsync(accessToken: _twitchToken);
+            } catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
 
             Debug.WriteLine(" ");
         }
