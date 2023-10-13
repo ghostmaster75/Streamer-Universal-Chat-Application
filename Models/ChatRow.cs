@@ -11,13 +11,13 @@ namespace Streamer_Universal_Chat_Application.Models
         public String ImageSource { get; private set; }
         public String NickName { get; private set; }
 
-        public List<KeyValuePair<string, string>> Badges;
+        public List<AppBadge> Badges { get; set; }
         public String ChatText { get; set; }
         public String MsgDateTime { get; private set; }
         public Color UserColor { get; private set; }
         public SolidColorBrush BrushColor { get => new SolidColorBrush(UserColor); }
 
-        public ChatRow(Common.Sources source, String imageSource, String nickNAme, List<KeyValuePair<string, string>> badges, String chatText, String dateTime, Color userColor)
+        public ChatRow(Common.Sources source, String imageSource, String nickNAme, List<AppBadge> badges, String chatText, String dateTime, Color userColor)
         {
             Source = source;
             ImageSource = imageSource;

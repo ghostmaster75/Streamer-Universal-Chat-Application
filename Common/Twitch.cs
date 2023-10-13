@@ -98,6 +98,7 @@ namespace Streamer_Universal_Chat_Application.Common
             catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
+                this.StatusMessage(_resourceLoader.GetString("Twich error: ") + " " + e.Message);
                 onConnectException?.Invoke(e);
                 return;
             }
@@ -109,6 +110,7 @@ namespace Streamer_Universal_Chat_Application.Common
             catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
+                this.StatusMessage(_resourceLoader.GetString("Twich error: ") + " " + e.Message);
                 onConnectException?.Invoke(e);
             }
         }
@@ -120,7 +122,7 @@ namespace Streamer_Universal_Chat_Application.Common
             if (client != null)
             {
                 Debug.WriteLine("Disconnecting Client");
-                client.Disconnect();
+                //client.Disconnect();
                 Debug.WriteLine("Removing EventListeners from Client");
                 TearDownEvents(client);
                 client = null;
@@ -202,7 +204,7 @@ namespace Streamer_Universal_Chat_Application.Common
 
 
 
-            ChatRow chatRow = new ChatRow(Common.Sources.Twitch, Common.Costant.TwitchLogo, nickName, e.ChatMessage.Badges, message, e.ChatMessage.TmiSentTs, color);
+            ChatRow chatRow = new ChatRow(Common.Sources.Twitch, Common.Costant.TwitchLogo, nickName, null, message, e.ChatMessage.TmiSentTs, color);
 
             OnMessageReceived(new MessageReceivedEventArgs(chatRow));
 
@@ -239,7 +241,6 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private void StatusMessage(String message)
         {
-
             OnStatusMessage(new StatusMessageEventArgs(message));
         }
 

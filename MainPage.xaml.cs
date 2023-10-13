@@ -227,8 +227,7 @@ namespace Streamer_Universal_Chat_Application
         {
             var uiSettings = new Windows.UI.ViewManagement.UISettings();
             Color color = uiSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Accent);
-            List<KeyValuePair<string, string>> badges = new List<KeyValuePair<string, string>>();
-            ChatRow appRow = new ChatRow(Common.Sources.Application, Common.Costant.RoundedLogo, "Streamer Universal Chat Application", badges, Message, "0", color);
+            ChatRow appRow = new ChatRow(Common.Sources.Application, Common.Costant.RoundedLogo, "Streamer Universal Chat Application", null, Message, "0", color);
             Grid grid = BuildRow.Make(appRow);
             chatListView.Items.Add(grid);
             if (chatListView.Items.Count > _maxHistory)

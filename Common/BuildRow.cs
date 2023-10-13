@@ -1,6 +1,7 @@
 ﻿using Streamer_Universal_Chat_Application.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using Windows.UI;
 using Windows.UI.Text;
 using Windows.UI.Xaml;
@@ -17,7 +18,7 @@ namespace Streamer_Universal_Chat_Application.Common
         private AppSettings appSettings = new AppSettings();
         public BuildRow() { }
 
-        private void ProcessEmoji(Sources source, Boolean isNickColor, Color color, string text, RichTextBlock richTextBlock)
+        private void ProcessEmojiAndBadges(Sources source, Boolean isNickColor, Color color, string text, List<AppBadge> appBadges, RichTextBlock richTextBlock)
         {
             IReadOnlyDictionary<string, string> emoMapping = new Dictionary<string, string>();
 
@@ -51,15 +52,15 @@ namespace Streamer_Universal_Chat_Application.Common
                     paragraph.Inlines.Add(container);
                     paragraph.Inlines.Add(new Run() { Text = " " }); // Add space to separate the emoji from the next word
                 }
-                else if (word.Contains("emoticon") || word.Contains("badges"))
+                else if (word.Contains("emoticon") || word.Contains("badges") || word.Contains("{badgeimage:"))
                 {
                     // URL containing "emoticon" found, add image to paragraph
                     if (!string.IsNullOrEmpty(word))
                     {
                         Image emoticonImage = new Image();
                         emoticonImage.Source = new BitmapImage(new Uri(word));
-                        emoticonImage.Width = 20;
-                        emoticonImage.Height = 20;
+                        emoticonImage.Width = 12;
+                        emoticonImage.Height = 12;
 
                         InlineUIContainer container = new InlineUIContainer();
                         container.Child = emoticonImage;
@@ -74,9 +75,93 @@ namespace Streamer_Universal_Chat_Application.Common
                     paragraph.Inlines.Add(new Run() { Text = word + " ", Foreground = new SolidColorBrush(color) });
                 }
             }
+            if (appBadges != null && appBadges.Count > 0)
+            {
+                InlineUIContainer badgeContainer = new InlineUIContainer();
+                foreach (AppBadge appBadge in appBadges)
+                {
+                    badgeContainer.FontSize = 12;
+
+                    if (appBadge.backgroundColor != null && appBadge.backgroundColor.Length > 0)
+                    {
+                        if (appBadge.backgroundColor.StartsWith("#"))
+                        {
+                            appBadge.backgroundColor = appBadge.backgroundColor.Substring(1);
+                        }
+                    }
+                    else
+                    {
+                        appBadge.backgroundColor = "803F3F3F";
+                    }
+
+                    byte a = byte.Parse(appBadge.backgroundColor.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+                    byte r = byte.Parse(appBadge.backgroundColor.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+                    byte g = byte.Parse(appBadge.backgroundColor.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+                    byte b = byte.Parse(appBadge.backgroundColor.Substring(6, 2), System.Globalization.NumberStyles.HexNumber);
+
+                    Color bgColor = Color.FromArgb(a, r, g, b);
+
+                    if (appBadge.backgroundBorder != null && appBadge.backgroundBorder.Length > 0)
+                    {
+                        if (appBadge.backgroundBorder.StartsWith("#"))
+                        {
+                            appBadge.backgroundBorder = appBadge.backgroundBorder.Substring(1);
+                        }
+                    }
+                    else
+                    {
+                        appBadge.backgroundBorder = appBadge.backgroundColor;
+                    }
+
+                    byte ab = byte.Parse(appBadge.backgroundBorder.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+                    byte rb = byte.Parse(appBadge.backgroundBorder.Substring(2, 2), System.Globalization.NumberStyles.HexNumber);
+                    byte gb = byte.Parse(appBadge.backgroundBorder.Substring(4, 2), System.Globalization.NumberStyles.HexNumber);
+                    byte bb = byte.Parse(appBadge.backgroundBorder.Substring(6, 2), System.Globalization.NumberStyles.HexNumber);
+                    Color bColor = Color.FromArgb(ab, rb, gb, bb);
+
+                    StackPanel stackPanel = new StackPanel();
+                    stackPanel.Orientation = Orientation.Horizontal;
+
+                    Border border = new Border();
+                    border.Background = new SolidColorBrush(bgColor);
+                    border.BorderBrush = new SolidColorBrush(bColor);
+                    border.CornerRadius = new CornerRadius(4);
+                    border.BorderThickness = new Thickness(3,0,3,0);
+
+
+                    if (appBadge.imageUrl != null)
+                    {
+                        Image badgeImage = new Image();
+                        badgeImage.Source = new BitmapImage(new Uri(appBadge.imageUrl));
+                        badgeImage.Width = 12;
+                        badgeImage.Height = 12;
+                        stackPanel.Children.Add(badgeImage);
+                    }
+
+         
+
+                    TextBlock textBlock = new TextBlock();
+                    if (appBadge.text != null && appBadge.text.Length > 0)
+                    {
+                        textBlock.Text = appBadge.text;
+                    }
+                    textBlock.FontSize = 12;
+                    textBlock.Padding = new Thickness(0);
+                    stackPanel.Children.Add(textBlock);
+                    
+
+                    border.Child= stackPanel;
+                    InlineUIContainer stackPanelContainer = new InlineUIContainer();
+                    stackPanelContainer.Child = border;
+                    paragraph.Inlines.Add(stackPanelContainer);
+                    paragraph.Inlines.Add(new Run() { Text = " " });
+                }
+            }
+
 
             richTextBlock.Blocks.Add(paragraph);
         }
+
 
         public Grid Make(ChatRow chatRow)
         {
@@ -119,10 +204,10 @@ namespace Streamer_Universal_Chat_Application.Common
                 color = uiSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Accent);
             }
 
-            this.ProcessEmoji(chatRow.Source, true, color, chatRow.NickName, chatText);
+            this.ProcessEmojiAndBadges(chatRow.Source, true, color, chatRow.NickName, chatRow.Badges, chatText );
 
             color = uiSettings.GetColorValue(Windows.UI.ViewManagement.UIColorType.Foreground);
-            this.ProcessEmoji(chatRow.Source, false, color, chatRow.ChatText, chatText);
+            this.ProcessEmojiAndBadges(chatRow.Source, false, color, chatRow.ChatText, null, chatText);
             Grid.SetColumn(chatText, 1);
             grid.Children.Add(chatText);
 

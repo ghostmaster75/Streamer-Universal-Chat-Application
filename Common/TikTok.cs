@@ -2,14 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using TikTokLiveSharp.Client;
-using TikTokLiveSharp.Events.MessageData.Messages;
-using TikTokLiveSharp.Events.MessageData.Objects;
+using TikTokLiveSharp.Client.Config;
+using TikTokLiveSharp.Events;
+using TikTokLiveSharp.Events.Objects;
+using TikTokLiveSharp.Models.Protobuf.Objects;
 using Windows.ApplicationModel.Resources;
 using Windows.UI;
+
 using static Streamer_Universal_Chat_Application.Common.Events;
+using static TwitchLib.PubSub.Models.Responses.Messages.Whisper.DataObjWhisperReceived;
+using Badge = TikTokLiveSharp.Events.Objects.Badge;
 
 namespace Streamer_Universal_Chat_Application.Common
 {
@@ -22,7 +28,6 @@ namespace Streamer_Universal_Chat_Application.Common
         private static TikTok _instance;
         private readonly String _TikTokUser;
         protected TikTokLiveClient client;
-        private ClientSettings settings;
         protected CancellationTokenSource tokenSource = new CancellationTokenSource();
         private ResourceLoader _resourceLoader = ResourceLoader.GetForCurrentView("Resources");
 
@@ -58,7 +63,10 @@ namespace Streamer_Universal_Chat_Application.Common
                 }
 
                 Debug.WriteLine("Creating new TikTokLiveClient");
-                client = new TikTokLiveClient(userID, settings, null);
+                client = new TikTokLiveClient(userID, "", new ClientSettings()
+                {
+                    EnableCompression = false
+                });
                 Debug.WriteLine($"Created new Client with HostName {userID}");
                 Debug.WriteLine("Connecting Events to Client");
                 SetupEvents(client);
@@ -71,7 +79,8 @@ namespace Streamer_Universal_Chat_Application.Common
             }
             try
             {
-                await client.Start(tokenSource.Token, Client_Error, settings.RetryOnConnectionFailure);
+                bool retryConnection = true;
+                await client.Start(tokenSource.Token, Client_Error, retryConnection);
                 Debug.WriteLine("Connected");
             }
             catch (Exception e)
@@ -99,11 +108,6 @@ namespace Streamer_Universal_Chat_Application.Common
             tokenSource = new CancellationTokenSource();
         }
 
-        private void Client_Error(object sender, Exception e)
-        {
-            this.StatusMessage($"Tiktok: {e.Message}");
-        }
-
         private void Client_Error(Exception e)
         {
             this.StatusMessage($"Tiktok: {e.Message}");
@@ -129,10 +133,10 @@ namespace Streamer_Universal_Chat_Application.Common
             Debug.WriteLine($"Disconnected from Room! [Connected:{e}]");
         }
 
-        private void Client_OnViewerData(TikTokLiveClient sender, RoomViewerData e)
+        private void Client_OnViewerData(TikTokLiveClient sender, RoomUpdate e)
         {
-            OnLiveInfo(new StreamEventArgs(e.ViewerCount.ToString()));
-            Debug.WriteLine($"Viewer count is: {e.ViewerCount}");
+            OnLiveInfo(new StreamEventArgs(e.NumberOfViewers.ToString()));
+            Debug.WriteLine($"Viewer count is: {e.NumberOfViewers}");
         }
 
         public virtual void OnLiveInfo(StreamEventArgs streamEventArgs)
@@ -140,11 +144,11 @@ namespace Streamer_Universal_Chat_Application.Common
             StreamEvent?.Invoke(this, streamEventArgs);
         }
 
-        private void Client_OnLiveEnded(TikTokLiveClient sender, EventArgs e)
+        private void Client_OnLiveEnded(TikTokLiveClient sender, ControlMessage e)
         {
             this.StatusMessage(_resourceLoader.GetString("TiktokEndedStream"));
             Debug.WriteLine("Host ended Stream!");
-            client.Stop();
+            DisconnectFromLivestreamAsync();
         }
 
         private static void Client_OnJoin(TikTokLiveClient sender, Join e)
@@ -152,9 +156,9 @@ namespace Streamer_Universal_Chat_Application.Common
             Debug.WriteLine($"{e.User.UniqueId} joined!");
         }
 
-        private void Client_OnComment(TikTokLiveClient sender, Comment e)
+        private void Client_OnComment(TikTokLiveClient sender, Chat e)
         {
-            Debug.WriteLine($"{e.User.UniqueId}: {e.Text}");
+            Debug.WriteLine($"{e.Sender.UniqueId}: {e.Message}");
 
             Color color = new Color();
             var uiSettings = new Windows.UI.ViewManagement.UISettings();
@@ -162,37 +166,54 @@ namespace Streamer_Universal_Chat_Application.Common
             DateTime pointOfReference = new DateTime(2000, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             long ticks = (long)(e.TimeStamp / 100);
             var times = pointOfReference.AddTicks(ticks);
-            List<Badge> badges = e.User.Badges;
+            IReadOnlyList<Badge> badgesIRO = e.Sender.Badges;
+            IReadOnlyList<Picture> badgesImages = e.Sender.BadgeImages;
 
-            String nickName = e.User.NickName;
-            if (badges != null && badges.Count > 0)
+            String nickName = e.Sender.NickName;
+
+            foreach (Picture badgePicture in badgesImages)
             {
-                badges.ForEach(delegate (Badge badge)
-                {
-                    foreach (TextBadge textBadge in badge.TextBadges)
-                    {
-                        Debug.WriteLine($"Text Badge - Type: {textBadge.Type} - Name: {textBadge.Name}");
-                        nickName += $" {textBadge.Name}";
-                    }
-
-                    foreach (ImageBadge imageBadge in badge.ImageBadges)
-                    {
-                        Debug.WriteLine($"Image Badge - DisplayType: {imageBadge.DisplayType} - Image: {imageBadge.Image}");
-                        nickName += $" {imageBadge.Image}";
-                    }
-
-                    if (badge.ComboBadges != null)
-                    {
-                        Debug.WriteLine($"Image Badge - Data: {badge.ComboBadges.Data} - Image: {badge.ComboBadges.Image}");
-                        nickName += $" {badge.ComboBadges.Data}";
-                    }
-                });
+                Debug.WriteLine($"{badgePicture.ImageContent.Name}");
+                nickName += $" {badgePicture.OpenWebUrl}";
             }
 
-            //List<KeyValuePair<string, string>> badge = new List<KeyValuePair<string, string>>();
+            Debug.WriteLine($"Badge count: {badgesIRO.Count}");
+            List<AppBadge> appBadges = new List<AppBadge>();
+
+            foreach (Badge badges in badgesIRO)
+            {
+                Debug.WriteLine($"Badge data : {badges.BadgeData}");
+                Debug.WriteLine($"Badge image : {badges.Image.Image.OpenWebUrl}");
+                Debug.WriteLine($"Badge text : {badges.Text}");
+                Debug.WriteLine($"Badge displaytype : {badges.DisplayType}");
+                if (badges.Display)
+                {
+                    switch (badges.DisplayType)
+                    {
+                        case TikTokLiveSharp.Models.Protobuf.Objects.Enums.BadgeDisplayType.BadgeDisplayType_Text:
+                            //nickName += $"{{badgetext:{badges.Text.DefaultPattern}}}";
+                            appBadges.Add(new AppBadge(null, null, null, badges.Text.DefaultPattern));
+                            break;
+                        case TikTokLiveSharp.Models.Protobuf.Objects.Enums.BadgeDisplayType.BadgeDisplayType_Image:
+                            //nickName += $"{{badgeimage:{badges.Image.Image.Urls.FirstOrDefault()}}}";
+                            appBadges.Add(new AppBadge(null, null, badges.Image.Image.Urls.FirstOrDefault(), null));
+                            break;
+                        case TikTokLiveSharp.Models.Protobuf.Objects.Enums.BadgeDisplayType.BadgeDisplayType_String:
+                            //nickName += $"{{badgetext:{badges.String}}}";
+                            appBadges.Add(new AppBadge(null, null, null, badges.String.String));
+                            break;
+                        default:
+                            //nickName += $"{{badgeimage:{badges.Combine.Icon.Urls.FirstOrDefault()}}} {{badgetext:{badges.Combine.String.Trim()}}}";
+                            appBadges.Add(new AppBadge(badges.Combine.Background.BackgroundColorCode, badges.Combine.Background.BorderColorCode, badges.Combine.Icon.Urls.FirstOrDefault(), badges.Combine.String.Trim()));
+                            break;
+                    }
+                }
+            }
+
+            List<KeyValuePair<string, string>> badge = new List<KeyValuePair<string, string>>();
 
 
-            ChatRow chatRow = new ChatRow(Sources.Tiktok, Costant.TikTokLogo, e.User.NickName, null, e.Text, times.ToString("dd-MM-yyy HH:mm:ss"), color);
+            ChatRow chatRow = new ChatRow(Sources.Tiktok, Costant.TikTokLogo, nickName, appBadges, e.Message, times.ToString("dd-MM-yyy HH:mm:ss"), color);
 
             OnMessageReceived(new MessageReceivedEventArgs(chatRow));
         }
@@ -204,8 +225,8 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private void Client_OnFollow(object sender, Follow e)
         {
-            this.StatusMessage($"👀 {e.NewFollower?.UniqueId} {_resourceLoader.GetString("Follower")}");
-            Debug.WriteLine($"{e.NewFollower?.UniqueId} followed!");
+            this.StatusMessage($"👀 {e.User?.UniqueId} {_resourceLoader.GetString("Follower")}");
+            Debug.WriteLine($"{e.User?.UniqueId} followed!");
         }
 
         private void Client_OnShare(TikTokLiveClient sender, Share e)
@@ -216,26 +237,26 @@ namespace Streamer_Universal_Chat_Application.Common
 
         private void Client_OnSubscribe(TikTokLiveClient sender, Subscribe e)
         {
-            this.StatusMessage($"🌟 {e.NewSubscriber.UniqueId} {_resourceLoader.GetString("Subscriber")}");
-            Debug.WriteLine($"{e.NewSubscriber.UniqueId} subscribed!");
+            this.StatusMessage($"🌟 {e.User?.UniqueId} {_resourceLoader.GetString("Subscriber")}");
+            Debug.WriteLine($"{e.User?.UniqueId} subscribed!");
         }
 
         private void Client_OnLike(TikTokLiveClient sender, Like e)
         {
-            this.StatusMessage($"❤ {e.Sender.UniqueId} {_resourceLoader.GetString("Liked")}");
+            //this.StatusMessage($"❤ {e.Sender.UniqueId} {_resourceLoader.GetString("Liked")}");
             Debug.WriteLine($"{e.Sender.UniqueId} liked!");
         }
 
         private void Client_OnGiftMessage(TikTokLiveClient sender, GiftMessage e)
         {
-            this.StatusMessage($"🎁 {e.Sender.UniqueId} {_resourceLoader.GetString("GiftMessage")} {e.Amount}x {e.Gift.Name}!");
-            Debug.WriteLine($"{e.Sender.UniqueId} sent {e.Amount}x {e.Gift.Name}!");
+            this.StatusMessage($"🎁 {e.User.UniqueId} {_resourceLoader.GetString("GiftMessage")} {e.Amount}x {e.Gift.Name}!");
+            Debug.WriteLine($"{e.User.UniqueId} sent {e.Amount}x {e.Gift.Name}!");
         }
 
-        private void Client_OnEmote(TikTokLiveClient sender, Emote e)
+        private void Client_OnEmote(TikTokLiveClient sender, EmoteChat e)
         {
-            this.StatusMessage($"{e.User.UniqueId} {_resourceLoader.GetString("GiftMessage")} {e.EmoteId}!");
-            Debug.WriteLine($"{e.User.UniqueId} sent {e.EmoteId}!");
+            this.StatusMessage($"{e.User.UniqueId} {_resourceLoader.GetString("GiftMessage")} {e.Emotes.First()?.Id}!");
+            Debug.WriteLine($"{e.User.UniqueId} sent {e.Emotes.First()?.Id}!");
         }
         private void StatusMessage(String message)
         {
@@ -258,31 +279,31 @@ namespace Streamer_Universal_Chat_Application.Common
         {
             client.OnConnected += Client_OnConnected;
             client.OnDisconnected += Client_OnDisconnected;
-            client.OnViewerData += Client_OnViewerData;
+            client.OnRoomUpdate += Client_OnViewerData;
             client.OnLiveEnded += Client_OnLiveEnded;
             client.OnJoin += Client_OnJoin;
-            client.OnComment += Client_OnComment;
+            client.OnChatMessage += Client_OnComment;
             client.OnFollow += Client_OnFollow;
             client.OnShare += Client_OnShare;
             client.OnSubscribe += Client_OnSubscribe;
             client.OnLike += Client_OnLike;
             client.OnGiftMessage += Client_OnGiftMessage;
-            client.OnEmote += Client_OnEmote;
+            client.OnEmoteChat += Client_OnEmote;
         }
         private void TearDownEvents(TikTokLiveClient client)
         {
             client.OnConnected -= Client_OnConnected;
             client.OnDisconnected -= Client_OnDisconnected;
-            client.OnViewerData -= Client_OnViewerData;
+            client.OnRoomUpdate -= Client_OnViewerData;
             client.OnLiveEnded -= Client_OnLiveEnded;
             client.OnJoin -= Client_OnJoin;
-            client.OnComment -= Client_OnComment;
+            client.OnChatMessage -= Client_OnComment;
             client.OnFollow -= Client_OnFollow;
             client.OnShare -= Client_OnShare;
             client.OnSubscribe -= Client_OnSubscribe;
             client.OnLike -= Client_OnLike;
             client.OnGiftMessage -= Client_OnGiftMessage;
-            client.OnEmote -= Client_OnEmote;
+            client.OnEmoteChat -= Client_OnEmote;
         }
 
     }
