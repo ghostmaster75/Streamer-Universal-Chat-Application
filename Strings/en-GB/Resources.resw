@@ -152,7 +152,7 @@ This disclaimer is subject to change without notice.</value>
   <data name="MaxHistoryLine.Header" xml:space="preserve">
     <value>Maximum number of displayable chat lines</value>
   </data>
-  <data name="Save,Label" xml:space="preserve">
+  <data name="Save.Label" xml:space="preserve">
     <value>Save</value>
   </data>
   <data name="Settings.Label" xml:space="preserve">

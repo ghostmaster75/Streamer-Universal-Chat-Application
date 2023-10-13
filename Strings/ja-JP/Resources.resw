@@ -147,7 +147,7 @@
   <data name="MaxHistoryLine.Header" xml:space="preserve">
     <value>表示可能なチャット行の最大数</value>
   </data>
-  <data name="Save,Label" xml:space="preserve">
+  <data name="Save.Label" xml:space="preserve">
     <value>保存</value>
   </data>
   <data name="Settings.Label" xml:space="preserve">
