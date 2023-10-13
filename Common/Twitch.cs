@@ -290,7 +290,7 @@ namespace Streamer_Universal_Chat_Application.Common
                 globalBadges = await api.Helix.Chat.GetGlobalChatBadgesAsync(accessToken: _twitchToken);
             } catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message);
+                Debug.WriteLine($"Twitch error {ex.Message}");
             }
 
             Debug.WriteLine(" ");
