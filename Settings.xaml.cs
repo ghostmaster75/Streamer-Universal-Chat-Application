@@ -176,12 +176,13 @@ namespace Streamer_Universal_Chat_Application
         private void Undo_Click(object sender, RoutedEventArgs e)
         {
             toogleSwitchTwitchEnable.IsOn = twitchEnable;
-            textBoxTwitchUser.Text = twitchUsername;
-            passwordBoxTwitchToken.Password = twitchToken;
-            textBoxTwitchChannel.Text = twitchChannel;
-            textBoxTwitchClientId.Text = twitchClientId;
+
+            textBoxTwitchUser.Text = twitchUsername != null ? twitchUsername : "";
+            passwordBoxTwitchToken.Password = twitchToken != null ? twitchToken : "" ;
+            textBoxTwitchChannel.Text = twitchChannel != null ? twitchChannel : "";
+            textBoxTwitchClientId.Text = twitchClientId != null ? twitchClientId : "";
             toogleSwitchTikTokEnable.IsOn = tikTokEnable;
-            textBoxTikTokUserName.Text = tikTokUserName;
+            textBoxTikTokUserName.Text = tikTokUserName != null ? tikTokUserName : "";
             textBoxMaxHistoryChat.Text = maxHistoryChat.ToString();
             this.DisableButtons();
         }
@@ -215,7 +216,7 @@ namespace Streamer_Universal_Chat_Application
         private Boolean IsSettingsChanged()
         {
             if (textBoxMaxHistoryChat.Text != maxHistoryChat.ToString()
-                || textBoxTwitchUser.Text != twitchUsername
+                || textBoxTwitchUser.Text != twitchUsername 
                 || passwordBoxTwitchToken.Password != twitchToken
                 || textBoxTwitchChannel.Text != twitchChannel
                 || textBoxTwitchClientId.Text != twitchClientId

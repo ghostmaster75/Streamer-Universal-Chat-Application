@@ -33,7 +33,7 @@ namespace Streamer_Universal_Chat_Application.Common
         public event EventHandler<StreamEventArgs> StreamEvent;
         private ResourceLoader _resourceLoader = ResourceLoader.GetForCurrentView("Resources");
         private static TwitchAPI api;
-        private GetFollowedStreamsResponse channelFollowers;
+        //private GetFollowedStreamsResponse channelFollowers;
         private GetStreamsResponse streams;
         private String _twitchToken;
         private String _twitchUser;
@@ -59,8 +59,17 @@ namespace Streamer_Universal_Chat_Application.Common
 
         public async void ConnectToStreamAsync(String twitchUser, String twitchToken, String twitchChannel, String twitchClientId, Action<Exception> onConnectException = null)
         {
-            await ConnectToStream(twitchUser, twitchToken, twitchChannel, twitchClientId, onConnectException);
-            await GetBadges();
+            try
+            {
+                await ConnectToStream(twitchUser, twitchToken, twitchChannel, twitchClientId, onConnectException);
+                await GetBadges();
+            }
+            catch (Exception e)
+            {
+                this.StatusMessage($"Twitch error: {e.Message}");
+                onConnectException?.Invoke(e);
+            }
+
         }
 
         public async Task ConnectToStream(String twitchUser, String twitchToken, String twitchChannel, String twitchClientId, Action<Exception> onConnectException = null)
@@ -98,7 +107,7 @@ namespace Streamer_Universal_Chat_Application.Common
             catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
-                this.StatusMessage(_resourceLoader.GetString("Twich error: ") + " " + e.Message);
+                this.StatusMessage($"Twitch error: {e.Message}");
                 onConnectException?.Invoke(e);
                 return;
             }
@@ -110,7 +119,7 @@ namespace Streamer_Universal_Chat_Application.Common
             catch (Exception e)
             {
                 Debug.WriteLine(e.Message);
-                this.StatusMessage(_resourceLoader.GetString("Twich error: ") + " " + e.Message);
+                this.StatusMessage($"Twitch error: {e.Message}");
                 onConnectException?.Invoke(e);
             }
         }
@@ -253,12 +262,20 @@ namespace Streamer_Universal_Chat_Application.Common
         public async Task GetLiveInfo()
         {
             List<string> userLists = new List<string> { _twitchUser };
-            streams = await api.Helix.Streams.GetStreamsAsync(userLogins: userLists, accessToken: _twitchToken);
-            if (streams != null && streams.Streams.Length > 0)
+            try
             {
-                TwitchLib.Api.Helix.Models.Streams.GetStreams.Stream stream = streams.Streams[0];
-                Debug.WriteLine($"Viewer : {stream.ViewerCount}");
-                OnLiveInfo(new StreamEventArgs(stream.ViewerCount.ToString()));
+                streams = await api.Helix.Streams.GetStreamsAsync(userLogins: userLists, accessToken: _twitchToken);
+
+                if (streams != null && streams.Streams.Length > 0)
+                {
+                    TwitchLib.Api.Helix.Models.Streams.GetStreams.Stream stream = streams.Streams[0];
+                    Debug.WriteLine($"Viewer : {stream.ViewerCount}");
+                    OnLiveInfo(new StreamEventArgs(stream.ViewerCount.ToString()));
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
             }
             //            else {
             //                this.StatusMessage($"{ _resourceLoader.GetString("TwitchNoLive")}");

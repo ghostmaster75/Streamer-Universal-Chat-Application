@@ -26,7 +26,7 @@ namespace Streamer_Universal_Chat_Application.Common
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
         public event EventHandler<StreamEventArgs> StreamEvent;
         private static TikTok _instance;
-        private readonly String _TikTokUser;
+        //private readonly String _TikTokUser;
         protected TikTokLiveClient client;
         protected CancellationTokenSource tokenSource = new CancellationTokenSource();
         private ResourceLoader _resourceLoader = ResourceLoader.GetForCurrentView("Resources");
