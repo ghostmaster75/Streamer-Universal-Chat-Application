@@ -4,8 +4,6 @@ using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
-// Il modello di elemento Pagina vuota è documentato all'indirizzo https://go.microsoft.com/fwlink/?LinkId=234238
-
 namespace Streamer_Universal_Chat_Application
 {
     /// <summary>
@@ -178,7 +176,7 @@ namespace Streamer_Universal_Chat_Application
             toogleSwitchTwitchEnable.IsOn = twitchEnable;
 
             textBoxTwitchUser.Text = twitchUsername != null ? twitchUsername : "";
-            passwordBoxTwitchToken.Password = twitchToken != null ? twitchToken : "" ;
+            passwordBoxTwitchToken.Password = twitchToken != null ? twitchToken : "";
             textBoxTwitchChannel.Text = twitchChannel != null ? twitchChannel : "";
             textBoxTwitchClientId.Text = twitchClientId != null ? twitchClientId : "";
             toogleSwitchTikTokEnable.IsOn = tikTokEnable;
@@ -199,7 +197,18 @@ namespace Streamer_Universal_Chat_Application
         private void Enable_Click(object sender, RoutedEventArgs e)
         {
             var selectedFlyoutItem = sender as ToggleSwitch;
-            settings.SaveSetting(selectedFlyoutItem.Name, selectedFlyoutItem.IsOn.ToString());
+            if (this.IsSettingsChanged())
+            {
+                this.EnableButtons();
+            }
+            else
+            {
+                this.DisableButtons();
+            }
+            //settings.SaveSetting(selectedFlyoutItem.Name, selectedFlyoutItem.IsOn.ToString());
+            //"TiktokEnable"
+            //"TwitchEnable"
+
         }
 
         private void EnableButtons()
@@ -216,7 +225,7 @@ namespace Streamer_Universal_Chat_Application
         private Boolean IsSettingsChanged()
         {
             if (textBoxMaxHistoryChat.Text != maxHistoryChat.ToString()
-                || textBoxTwitchUser.Text != twitchUsername 
+                || textBoxTwitchUser.Text != twitchUsername
                 || passwordBoxTwitchToken.Password != twitchToken
                 || textBoxTwitchChannel.Text != twitchChannel
                 || textBoxTwitchClientId.Text != twitchClientId

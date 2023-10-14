@@ -58,26 +58,39 @@ namespace Streamer_Universal_Chat_Application
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            if ((appSettings.LoadSetting("TwitchUsername") != null
-                && appSettings.LoadSetting("TwitchToken") != null
-                && appSettings.LoadSetting("TwitchChannel") != null
-                && appSettings.LoadSetting("TwitchClientId") != null)
-                && appSettings.LoadSetting("TwitchEnable") == "True")
+            if (appSettings.LoadSetting("TwitchEnable") == "True")
             {
-                _twitch.ConnectToStreamAsync(appSettings.LoadSetting("TwitchUsername"), appSettings.LoadSetting("TwitchToken"), appSettings.LoadSetting("TwitchChannel"), appSettings.LoadSetting("TwitchClientId"));
-                _twitch.MessageReceived += NewChat;
-                _twitch.Connected += OnLogon;
-                _twitch.StatusMessageReceived += OnStatus;
-                _twitch.StreamEvent += OnStreamInfo;
+                if ((appSettings.LoadSetting("TwitchUsername") != null && appSettings.LoadSetting("TwitchUsername").Trim().Length > 0
+                    && appSettings.LoadSetting("TwitchToken") != null && appSettings.LoadSetting("TwitchToken").Trim().Length > 0
+                    && appSettings.LoadSetting("TwitchChannel") != null && appSettings.LoadSetting("TwitchChannel").Trim().Length > 0
+                    && appSettings.LoadSetting("TwitchClientId") != null && appSettings.LoadSetting("TwitchClientId").Trim().Length > 0))
+                {
+                    _twitch.ConnectToStreamAsync(appSettings.LoadSetting("TwitchUsername"), appSettings.LoadSetting("TwitchToken"), appSettings.LoadSetting("TwitchChannel"), appSettings.LoadSetting("TwitchClientId"));
+                    _twitch.MessageReceived += NewChat;
+                    _twitch.Connected += OnLogon;
+                    _twitch.StatusMessageReceived += OnStatus;
+                    _twitch.StreamEvent += OnStreamInfo;
+                }
+                else
+                {
+                    this.AppChat("Twitch: " + _resourceLoader.GetString("SettingsError"));
+                }
             }
 
-            if (appSettings.LoadSetting("TikTokUserName") != null && appSettings.LoadSetting("TiktokEnable") == "True")
+            if (appSettings.LoadSetting("TiktokEnable") == "True")
             {
-                _tiktok.ConnectToStreamAsync(appSettings.LoadSetting("TikTokUserName"));
-                _tiktok.Connected += OnLogon;
-                _tiktok.MessageReceived += NewChat;
-                _tiktok.StatusMessageReceived += OnStatus;
-                _tiktok.StreamEvent += OnStreamInfo;
+                if (appSettings.LoadSetting("TikTokUserName") != null && appSettings.LoadSetting("TikTokUserName").Trim().Length > 0)
+                {
+                    _tiktok.ConnectToStreamAsync(appSettings.LoadSetting("TikTokUserName"));
+                    _tiktok.Connected += OnLogon;
+                    _tiktok.MessageReceived += NewChat;
+                    _tiktok.StatusMessageReceived += OnStatus;
+                    _tiktok.StreamEvent += OnStreamInfo;
+                }
+                else
+                {
+                    this.AppChat("TikTok: " + _resourceLoader.GetString("SettingsError"));
+                }
             }
             this.AppChat(_resourceLoader.GetString("WelcomeMessage"));
         }

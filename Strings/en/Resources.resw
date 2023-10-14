@@ -158,6 +158,9 @@ This disclaimer is subject to change without notice.</value>
   <data name="Settings.Label" xml:space="preserve">
     <value>Settings</value>
   </data>
+  <data name="SettingsError" xml:space="preserve">
+    <value>Settings error! Please check that all fields are filled out correctly in this application's settings.</value>
+  </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>Settings</value>
   </data>

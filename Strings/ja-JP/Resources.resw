@@ -153,6 +153,9 @@
   <data name="Settings.Label" xml:space="preserve">
     <value>設定</value>
   </data>
+  <data name="SettingsError" xml:space="preserve">
+    <value>設定エラーです！このアプリの設定で、すべてのフィールドが正しく記入されていることを確認してください。</value>
+  </data>
   <data name="SettingsTitle.Text" xml:space="preserve">
     <value>設定</value>
   </data>
